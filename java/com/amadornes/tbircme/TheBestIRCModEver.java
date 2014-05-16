@@ -1,6 +1,7 @@
 package com.amadornes.tbircme;
 
-import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 import net.minecraftforge.common.config.Configuration;
@@ -28,29 +29,17 @@ public class TheBestIRCModEver {
 	public static Logger log = Logger.getLogger("TBIRCME");
 
 	public static Configuration cfg = new Configuration();
+	
+	public static List<IRCConnection> connections = new ArrayList<IRCConnection>();
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent ev) {
-		// proxy.loadConfig(ev.getSuggestedConfigurationFile().getParentFile());
-		log.log(Level.INFO, "STARTING CONNECTION \\o/");
-		final IRCConnection irc = new IRCConnection("irc.esper.net", "TheBestIRCMod_Test");
-		irc.connect();
-		irc.waitUntilConnected();
-		irc.join("Framez");
-		irc.chat("Framez", "HOLY SHIT THIS WORKS \\o/");
-		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				irc.disconnect();
-			}
-		}));
-		log.log(Level.INFO, irc.isConnected() ? "CONNECTED \\o/" : "Not connected D:");
+		proxy.loadConfig(ev.getSuggestedConfigurationFile());
+		proxy.connectToServers();
 	}
 
 	@EventHandler
 	public void init(FMLInitializationEvent ev) {
-
 	}
 
 	@EventHandler

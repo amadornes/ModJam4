@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -35,6 +37,8 @@ public class IRCConnection {
 	private boolean shouldDisconnect = false;
 
 	private boolean connected = false;
+	
+	private List<String> channels = new ArrayList<String>();
 
 	public IRCConnection(String host, String nick) {
 		if (host == null)
@@ -131,6 +135,8 @@ public class IRCConnection {
 			throw new RENotConnected();
 
 		sendRaw("JOIN #" + channel);
+		if(!channels.contains(channel.toLowerCase()))
+			channels.add(channel.toLowerCase());
 	}
 
 	public void part(String channel) {
@@ -138,6 +144,8 @@ public class IRCConnection {
 			throw new RENotConnected();
 
 		sendRaw("PART #" + channel);
+		if(channels.contains(channel.toLowerCase()))
+			channels.remove(channel.toLowerCase());
 	}
 
 	public void chat(String channel, String message) {
@@ -186,7 +194,9 @@ public class IRCConnection {
 
 	@SubscribeEvent
 	public void onIngameChat(ServerChatEvent ev) {
-		chat("Framez", "<" + ev.username + "> " + ev.message);
+		for(String c : channels){
+			chat(c, "<" + ev.username + "> " + ev.message);
+		}
 	}
 
 	private void startConnectionTicker() {
