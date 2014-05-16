@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import net.minecraftforge.common.config.Configuration;
 
+import com.amadornes.tbircme.command.CommandTBIRCME;
 import com.amadornes.tbircme.network.IRCConnection;
 import com.amadornes.tbircme.proxy.CommonProxy;
 
@@ -16,6 +17,7 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.event.FMLServerStartingEvent;
 
 @Mod(modid = ModInfo.MODID, name = ModInfo.NAME, version = ModInfo.VERSION)
 public class TheBestIRCModEver {
@@ -45,6 +47,11 @@ public class TheBestIRCModEver {
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent ev) {
 
+	}
+	
+	@EventHandler
+	public void onServerStart(FMLServerStartingEvent ev){
+		ev.registerServerCommand(new CommandTBIRCME());
 	}
 
 }

@@ -4,90 +4,83 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraftforge.common.config.ConfigCategory;
 import net.minecraftforge.common.config.Configuration;
 
 import com.amadornes.tbircme.Config;
-import com.amadornes.tbircme.network.IRCConnection;
+import com.amadornes.tbircme.ModInfo;
+import com.amadornes.tbircme.network.Server;
 
 public class CommonProxy {
 
 	public void loadConfig(File configFile) {
-		Configuration cfg = new Configuration(configFile);
-		cfg.load();
+		File serverConfigFolder = new File(configFile.getParentFile(), ModInfo.MODID + "/servers/");
+		if (!serverConfigFolder.exists())
+			serverConfigFolder.mkdirs();
+
+		File exampleServerConfig = new File(serverConfigFolder, "example.cfg");
+		if (!exampleServerConfig.exists())
+			createExampleServerConfig(exampleServerConfig);
+
+		for (File f : serverConfigFolder.listFiles()) {
+			if (f.isFile() && f.getName().toLowerCase().endsWith(".cfg")) {
+				if (!f.getName().equalsIgnoreCase("example.cfg")) {
+					loadServerConfig(f);
+				}
+			}
+		}
+	}
+
+	private void loadServerConfig(File file) {
+		String host = "", username = "";
+		List<String> commands = new ArrayList<String>(), channels = new ArrayList<String>();
 		
-		cfg.get("servers", "irc.esper.net", new String[]{"Framez", "amadornes"});
-
-		// Servers and channels
+		Configuration cfg = new Configuration(file);
+		cfg.load();
 		{
-			ConfigCategory servers = cfg.getCategory("servers");
-			// Loop through all of them
-			for (String server : servers.keySet()) {
-				// Get the data for that server
-				String[] channels = servers.get(server).getStringList();
-				List<String> channelsL = new ArrayList<String>();
-
-				for (String ch : channels)
-					channelsL.add(ch);
-
-				Config.servers.put(server, channelsL);
+			// Login section
+			{
+				host = cfg.get("login", "host", "", "Host the bridge will connect to (for example: irc.esper.net). Can include a port.").getString().trim();
+				username = cfg.get("login", "username", "TheBestIRCModEver", "Username the bridge will use when connected to this server.").getString().trim();
+				String[] cmds = cfg.get("login", "commands", new String[]{}, "Commands to run after logging in (like Nickserv identify).").getStringList();
+				for(String s : cmds)
+					commands.add(s.trim());
+			}
+			// Channels section
+			{
+				String[] ch = cfg.get("channels", "channels", new String[]{}, "Channels that the bridge will work with. One on each line.").getStringList();
+				for(String s : ch)
+					channels.add(s.trim());
 			}
 		}
+		cfg.save();
+		
+		if(host == null || host == "" || username == null || username == "" || channels.size() == 0)
+			return;
+		
+		Config.servers.add(new Server(host, username, channels, commands));
+	}
 
-		// Usernames for each server
+	private void createExampleServerConfig(File file) {
+		Configuration cfg = new Configuration(file);
+		cfg.load();
 		{
-			ConfigCategory users = cfg.getCategory("usernames");
-			// Loop through all of them
-			for (String server : users.keySet()) {
-				String username = users.get(server).getString();
-
-				Config.usernames.put(server, username);
+			// Login section
+			{
+				cfg.get("login", "host", "", "Host the bridge will connect to (for example: irc.esper.net). Can include a port.");
+				cfg.get("login", "username", "TheBestIRCModEver", "Username the bridge will use when connected to this server.");
+				cfg.get("login", "commands", new String[]{}, "Commands to run after logging in (like Nickserv identify).");
+			}
+			// Channels section
+			{
+				cfg.get("channels", "channels", new String[]{}, "Channels that the bridge will work with. One on each line.");
 			}
 		}
-
-		// Get&set default username for all servers that don't have a custom one
-		{
-			Config.defaultUsername = cfg.get("login", "username", "TheBestIRCModEver_User").getString();
-			
-			for(String server : Config.servers.keySet()){
-				boolean exists = false;
-				for(String sv : Config.usernames.keySet())
-					if(server.equalsIgnoreCase(sv)){
-						exists = true;
-						break;
-					}
-				if(!exists)
-					Config.usernames.put(server, Config.defaultUsername);
-			}
-		}
-
 		cfg.save();
 	}
 
-	protected void loadServerConfigurations(Configuration cfg) {
-	}
-
 	public void connectToServers() {
-		for (final String s : Config.servers.keySet()) {
-			new Thread(new Runnable() {
-
-				@Override
-				public void run() {
-					final IRCConnection irc = new IRCConnection(s, "TheBestIRCMod_Test");
-					irc.connect();
-					irc.waitUntilConnected();
-					for (String c : Config.servers.get(s)) {
-						irc.join(c);
-					}
-					Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-						@Override
-						public void run() {
-							irc.disconnect();
-						}
-					}));
-				}
-			}, "[IRC] " + s).start();
-		}
+		for(Server s : Config.servers)
+			s.connect();
 	}
 
 }

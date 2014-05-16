@@ -1,14 +1,14 @@
 package com.amadornes.tbircme;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+
+import com.amadornes.tbircme.network.Server;
 
 public class Config {
-
-	public static String defaultUsername = "";
-	public static Map<String, String> usernames = new HashMap<String, String>();
-
-	public static Map<String, List<String>> servers = new HashMap<String, List<String>>();
-
+	
+	public static List<Server> servers = new ArrayList<Server>();
+	
+	public static String command = "tbircme cmd";
+	
 }

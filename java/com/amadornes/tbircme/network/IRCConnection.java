@@ -8,14 +8,23 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandManager;
+import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChunkCoordinates;
+import net.minecraft.util.IChatComponent;
+import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.ServerChatEvent;
 
+import com.amadornes.tbircme.Config;
 import com.amadornes.tbircme.TheBestIRCModEver;
 import com.amadornes.tbircme.exception.REAlreadyConnected;
 import com.amadornes.tbircme.exception.REErrorConnecting;
@@ -37,15 +46,50 @@ public class IRCConnection {
 	private boolean shouldDisconnect = false;
 
 	private boolean connected = false;
-	
-	private List<String> channels = new ArrayList<String>();
 
-	public IRCConnection(String host, String nick) {
+	private List<String> channels = new ArrayList<String>();
+	
+	private ICommandSender commandSender;
+
+	public IRCConnection(final String host, String nick) {
 		if (host == null)
 			throw new RENullHost();
 		this.host = host;
 		this.nick = nick;
 		MinecraftForge.EVENT_BUS.register(this);
+		
+		commandSender = new ICommandSender() {
+			
+			@Override
+			public ChunkCoordinates getPlayerCoordinates() {
+				return null;
+			}
+			
+			@Override
+			public World getEntityWorld() {
+				return null;
+			}
+			
+			@Override
+			public String getCommandSenderName() {
+				return host;
+			}
+			
+			@Override
+			public IChatComponent func_145748_c_() {
+				return null;
+			}
+			
+			@Override
+			public boolean canCommandSenderUseCommand(int var1, String var2) {
+				return true;
+			}
+			
+			@Override
+			public void addChatMessage(IChatComponent var1) {
+				broadcast(" > " + var1.getFormattedText() + " < ");
+			}
+		};
 	}
 
 	public void connect() {
@@ -119,6 +163,10 @@ public class IRCConnection {
 		sendRaw(str, true, true);
 	}
 
+	public void cmd(String cmd) {
+
+	}
+
 	public void sendRaw(String str, boolean carriageReturn, boolean flush) {
 		try {
 			String s = str + (carriageReturn ? "\r\n" : "");
@@ -135,7 +183,7 @@ public class IRCConnection {
 			throw new RENotConnected();
 
 		sendRaw("JOIN #" + channel);
-		if(!channels.contains(channel.toLowerCase()))
+		if (!channels.contains(channel.toLowerCase()))
 			channels.add(channel.toLowerCase());
 	}
 
@@ -144,7 +192,7 @@ public class IRCConnection {
 			throw new RENotConnected();
 
 		sendRaw("PART #" + channel);
-		if(channels.contains(channel.toLowerCase()))
+		if (channels.contains(channel.toLowerCase()))
 			channels.remove(channel.toLowerCase());
 	}
 
@@ -153,6 +201,12 @@ public class IRCConnection {
 			throw new RENotConnected();
 
 		sendRaw("PRIVMSG #" + channel + " :" + message);
+	}
+
+	public void broadcast(String message) {
+		for (String c : channels) {
+			chat(c, message);
+		}
 	}
 
 	private void onMessage(String s) {
@@ -173,8 +227,15 @@ public class IRCConnection {
 			String channel = st.substring(0, st.indexOf(" "));
 			String msg = st.substring(st.indexOf(" ") + 2);
 
-			if (channel.startsWith("#"))
-				onChatMessage(channel.substring(1), sender, msg);
+			if (channel.startsWith("#")) {
+				if (MinecraftServer.getServer() != null && MinecraftServer.getServer().isServerRunning()) {
+					if (msg.startsWith("!")) {
+						onCommand(channel.substring(1), sender, msg.substring(1));
+					} else {
+						onChatMessage(channel.substring(1), sender, msg);
+					}
+				}
+			}
 		}
 	}
 
@@ -184,18 +245,74 @@ public class IRCConnection {
 	}
 
 	protected void onChatMessage(String channel, String sender, String message) {
-		if (MinecraftServer.getServer() != null && MinecraftServer.getServer().isServerRunning()) {
-			for (Object o : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
-				EntityPlayer p = (EntityPlayer) o;
-				p.addChatMessage(new ChatComponentText("[" + channel + "] <" + sender + "> " + message));
-			}
+		String msg = "[" + channel + "] <" + sender + "> " + message;
+		if (message.trim().startsWith("ACTION ") && !message.startsWith("ACTION ")) {
+			msg = "[" + channel + "] * " + sender + " " + message.trim().substring("ACTION ".length());
+		}
+
+		for (Object o : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
+			EntityPlayer p = (EntityPlayer) o;
+			p.addChatMessage(new ChatComponentText(msg));
 		}
 	}
 
 	@SubscribeEvent
 	public void onIngameChat(ServerChatEvent ev) {
-		for(String c : channels){
-			chat(c, "<" + ev.username + "> " + ev.message);
+		broadcast("<" + ev.username + "> " + ev.message);
+	}
+
+	@SubscribeEvent
+	public void onIngameCommand(CommandEvent ev) {
+		if (ev.command.getCommandName().equalsIgnoreCase("me")) {
+			String msg = "";
+			for (String s : ev.parameters)
+				msg += s + " ";
+			msg = msg.trim();
+			broadcast("* \002" + ev.sender.getCommandSenderName() + "\002 " + msg);
+		}
+	}
+
+	protected void onCommand(String channel, String sender, String command) {
+		if (command.toLowerCase().startsWith(Config.command.toLowerCase())) {
+			String realCommand = command.substring(Config.command.length()).trim();
+
+			List<String> arguments = new ArrayList<String>();
+			if(realCommand.indexOf(" ") > 0){
+				StringTokenizer st = new StringTokenizer(realCommand.substring(realCommand.indexOf(" ")).trim(), " ");
+				while (st.hasMoreTokens())
+					arguments.add(st.nextToken());
+			}
+
+			String cmd = realCommand.substring(0, realCommand.indexOf(" ")).trim();
+			String[] args = arguments.toArray(new String[] {});
+
+			arguments.clear();
+			
+			ICommandManager manager = MinecraftServer.getServer().getCommandManager();
+			for(Object o : manager.getCommands().values()){
+				ICommand c = (ICommand) o;
+				boolean is = false;
+				if(c.getCommandName().equalsIgnoreCase(cmd))
+					is = true;
+				if(!is)
+					if(c.getCommandAliases() != null){
+						for(Object o2 : c.getCommandAliases()){
+							String s = (String) o2;
+							if(s.equalsIgnoreCase(cmd)){
+								is = true;
+								break;
+							}
+						}
+					}
+				if(is){
+					try{
+						c.processCommand(commandSender, args);
+					}catch(Exception ex){
+						chat(channel, sender + " > ERROR! " + ex.getMessage() + " < ");
+					}
+					break;
+				}
+			}
 		}
 	}
 
