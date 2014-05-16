@@ -83,4 +83,11 @@ public class CommonProxy {
 			s.connect();
 	}
 
+	public void disconnectFromServers() {
+		for(Server s : Config.servers){
+			s.disconnect();
+			System.out.println("AAAAAAAAAA");
+		}
+	}
+
 }

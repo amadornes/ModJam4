@@ -32,6 +32,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 public class IRCConnection {
 
 	private String host = null;
+	private String password = null;
 
 	private Socket socket = null;
 	private BufferedReader r = null;
@@ -47,14 +48,19 @@ public class IRCConnection {
 
 	private IRCCommandSender commandSender;
 
-	public IRCConnection(final String host, String nick) {
+	public IRCConnection(final String host, String nick, String password) {
 		if (host == null)
 			throw new RENullHost();
 		this.host = host;
 		this.nick = nick;
+		this.password = password;
 		MinecraftForge.EVENT_BUS.register(this);
 
 		commandSender = new IRCCommandSender(this, host);
+	}
+
+	public IRCConnection(final String host, String nick) {
+		this(host, nick, null);
 	}
 
 	public void connect() {
@@ -118,6 +124,14 @@ public class IRCConnection {
 
 	public void disconnect() {
 		shouldDisconnect = true;
+	}
+	
+	public void ragequit(){
+		sendRaw("QUIT");
+		try {
+			socket.close();
+		} catch (IOException e) {
+		}
 	}
 
 	public boolean isConnected() {

@@ -6,6 +6,8 @@ public class Server {
 
 	private String host, username;
 	private List<String> channels, commands;
+	
+	private IRCConnection irc;
 
 	public Server(String host, String username, List<String> channels, List<String> commands) {
 		this.host = host;
@@ -31,11 +33,13 @@ public class Server {
 	}
 
 	public void connect() {
+		final Server me = this;
 		new Thread(new Runnable() {
 
 			@Override
 			public void run() {
 				final IRCConnection irc = new IRCConnection(host, username);
+				me.irc = irc;
 				irc.connect();
 				irc.waitUntilConnected();
 				for (String c : commands) {
@@ -52,6 +56,10 @@ public class Server {
 				}));
 			}
 		}, "[IRC] " + host).start();
+	}
+	
+	public void disconnect(){
+		irc.ragequit();
 	}
 
 }
