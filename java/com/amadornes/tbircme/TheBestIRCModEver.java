@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 
-import com.amadornes.tbircme.gui.GuiHandler;
 import com.amadornes.tbircme.network.IRCConnection;
 import com.amadornes.tbircme.packet.PacketHandler;
 import com.amadornes.tbircme.proxy.CommonProxy;
@@ -62,7 +61,6 @@ public class TheBestIRCModEver {
 	@EventHandler
 	public void init(FMLInitializationEvent ev) {
 		channels = NetworkRegistry.INSTANCE.newChannel(ModInfo.MODID, new PacketHandler());
-		NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
 
 		com.amadornes.tbircme.handler.EventHandler handler = new com.amadornes.tbircme.handler.EventHandler();
 		MinecraftForge.EVENT_BUS.register(handler);
