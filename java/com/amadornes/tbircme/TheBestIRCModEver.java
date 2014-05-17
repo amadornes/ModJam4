@@ -1,6 +1,7 @@
 package com.amadornes.tbircme;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.logging.Logger;
@@ -46,6 +47,9 @@ public class TheBestIRCModEver {
 
 	public static boolean canChangeServerConfig = false;
 
+	public static List<String> emotes = new ArrayList<String>(
+			Arrays.asList(new String[] { "Kappa" }));
+
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent ev) {
 		proxy.loadConfig(ev.getSuggestedConfigurationFile());
@@ -59,7 +63,7 @@ public class TheBestIRCModEver {
 		com.amadornes.tbircme.handler.EventHandler handler = new com.amadornes.tbircme.handler.EventHandler();
 		MinecraftForge.EVENT_BUS.register(handler);
 		FMLCommonHandler.instance().bus().register(handler);
-		
+
 		proxy.registerRenders();
 	}
 

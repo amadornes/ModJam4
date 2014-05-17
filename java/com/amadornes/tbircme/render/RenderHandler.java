@@ -1,16 +1,21 @@
 package com.amadornes.tbircme.render;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ChatLine;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiNewChat;
-import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.entity.player.EntityPlayer.EnumChatVisibility;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 
 import org.lwjgl.opengl.GL11;
+
+import com.amadornes.tbircme.ModInfo;
+import com.amadornes.tbircme.TheBestIRCModEver;
+import com.amadornes.tbircme.util.ReflectionUtils;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
@@ -22,73 +27,148 @@ public class RenderHandler {
 		if (ev.type != ElementType.CHAT)
 			return;
 
-		boolean lighting = GL11.glIsEnabled(GL11.GL_LIGHTING);
-		GL11.glDisable(GL11.GL_LIGHTING);
-
-		int emoteSize = 14;
-		GuiNewChat chat = Minecraft.getMinecraft().ingameGUI.getChatGUI();
-		Field f = null;
-		;
-		try {
-			f = chat.getClass().getDeclaredField("chatLines");
-		} catch (Exception e) {
-		}
-
-		if (f == null)
+		if (Minecraft.getMinecraft().gameSettings.chatVisibility == EnumChatVisibility.HIDDEN)
 			return;
 
-		f.setAccessible(true);
-		List chatLines = null;
-		try {
-			chatLines = (List) f.get(chat);
-		} catch (Exception e) {
-		}
+		GL11.glPushMatrix();
+
+		boolean lighting = GL11.glIsEnabled(GL11.GL_LIGHTING);
+		GL11.glDisable(GL11.GL_LIGHTING);
+		GL11.glScaled(Minecraft.getMinecraft().gameSettings.chatScale,
+				Minecraft.getMinecraft().gameSettings.chatScale, 1);
+		GL11.glEnable(GL11.GL_LINE_SMOOTH);
+		GL11.glEnable(GL11.GL_POLYGON_SMOOTH);
+		GL11.glEnable(GL11.GL_POINT_SMOOTH);
+
+		GuiNewChat chat = Minecraft.getMinecraft().ingameGUI.getChatGUI();
+		List chatLines = (List) ReflectionUtils.get(chat, "chatLines");
+		boolean isOpen = chat.getChatOpen();
 
 		if (chatLines == null)
 			return;
 
 		for (Object o : chatLines) {
 			ChatLine l = (ChatLine) o;
-			int id = chatLines.indexOf(o);
-			double x = 0;
-			
-			if(!l.func_151461_a().getUnformattedTextForChat().contains("Kappa"))
-				continue;
-			
-			
-			
-			GL11.glPushMatrix();
-			{
-				GL11.glDisable(GL11.GL_TEXTURE_2D);
-				GL11.glColor4d(1, 0, 0, 1);
-				drawTexturedModalRect(x,
-						ev.resolution.getScaledHeight_double() - (9 * id) - 32
-								- (emoteSize / 2), 0, 0, emoteSize, emoteSize);
-				GL11.glEnable(GL11.GL_TEXTURE_2D);
-			}
-			GL11.glPopMatrix();
+			renderEmotesForLine(l, chat, chatLines, isOpen, ev);
 		}
 
+		GL11.glScaled(1 / Minecraft.getMinecraft().gameSettings.chatScale,
+				1 / Minecraft.getMinecraft().gameSettings.chatScale, 1);
 		if (lighting)
 			GL11.glEnable(GL11.GL_LIGHTING);
+		GL11.glDisable(GL11.GL_LINE_SMOOTH);
+		GL11.glDisable(GL11.GL_POLYGON_SMOOTH);
+		GL11.glDisable(GL11.GL_POINT_SMOOTH);
+
+		GL11.glPopMatrix();
+	}
+
+	@SuppressWarnings("rawtypes")
+	private void renderEmotesForLine(ChatLine l, GuiNewChat chat, List chatLines, boolean isOpen,
+			RenderGameOverlayEvent ev) {
+		FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
+		int id = chatLines.indexOf(l);
+		int id2 = (id - ((int) ReflectionUtils.get(chat, "field_146250_j")));
+		if ((id2 + 1) * 9 > (isOpen ? Minecraft.getMinecraft().gameSettings.chatHeightFocused
+				: Minecraft.getMinecraft().gameSettings.chatHeightUnfocused) * 180 || id2 < 0)
+			return;
+		id = id2;
+
+		double opacity = Minecraft.getMinecraft().gameSettings.chatOpacity * 0.9F + 0.1F;
+
+		int k1 = Minecraft.getMinecraft().ingameGUI.getUpdateCounter() - l.getUpdatedCounter();
+
+		if (k1 < 200 || isOpen) {
+			double d0 = (double) k1 / 200.0D;
+			d0 = 1.0D - d0;
+			d0 *= 10.0D;
+
+			if (d0 < 0.0D) {
+				d0 = 0.0D;
+			}
+
+			if (d0 > 1.0D) {
+				d0 = 1.0D;
+			}
+
+			d0 *= d0;
+			double i2 = (255.0D * d0);
+
+			if (isOpen) {
+				i2 = 255;
+			}
+
+			i2 = ((float) i2 * opacity);
+
+			if (i2 > 3) {
+				String unformatted = l.func_151461_a().getUnformattedTextForChat().trim();
+				String s = unformatted;
+				int index = 0;
+
+				boolean found = false;
+				do {
+					found = false;
+					String emote = "";
+					for (String e : TheBestIRCModEver.emotes) {
+						if (s.contains(" " + e + " ") || s.startsWith(e + " ")
+								|| (s.startsWith(e) && s.length() == e.length())
+								|| s.endsWith(" " + e)
+								|| (s.endsWith(e) && s.length() == e.length())) {
+							emote = e;
+							found = true;
+							index += s.indexOf(e) + e.length();
+							s = s.substring(s.indexOf(e) + e.length());
+							break;
+						}
+					}
+
+					if (found) {
+						String before = s.length() == 0 ? unformatted.substring(0, unformatted.length() - emote.length() - 1) : unformatted.substring(0, index);
+						int w = fr.getStringWidth(before);
+						System.out.println("\"" + before + "\" -> " + w);
+						renderEmote(w, id, emote, opacity, ev);
+					}
+				} while (found);
+			}
+		}
+	}
+
+	public void renderEmote(double x, int line, String emote, double opacity,
+			RenderGameOverlayEvent ev) {
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+		int emoteSize = 28;
+		GL11.glPushMatrix();
+		{
+			Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ModInfo.MODID
+					+ ":emotes/kappa.png"));
+			GL11.glColor4d(1, 1, 1, opacity);
+			GL11.glTranslated(x + 3, ev.resolution.getScaledHeight_double() - (9 * line) - 32 - 7, 0);
+			GL11.glScaled(0.5, 0.5, 1);
+			drawTexturedModalRect(0, 0, 0, 0, emoteSize, emoteSize);
+			GL11.glScaled(2, 2, 1);
+		}
+		GL11.glPopMatrix();
+
+		GL11.glDisable(GL11.GL_BLEND);
 	}
 
 	public void drawTexturedModalRect(double x, double y, double u, double v, double width,
 			double height) {
-		double zLevel = 0;
-		float f = 0.00390625F;
-		float f1 = 0.00390625F;
-		Tessellator tessellator = Tessellator.instance;
-		tessellator.startDrawingQuads();
-		tessellator.addVertexWithUV((double) (x + 0), (double) (y + height), (double) zLevel,
-				(double) ((float) (u + 0) * f), (double) ((float) (v + height) * f1));
-		tessellator.addVertexWithUV((double) (x + width), (double) (y + height), (double) zLevel,
-				(double) ((float) (u + width) * f), (double) ((float) (v + height) * f1));
-		tessellator.addVertexWithUV((double) (x + width), (double) (y + 0), (double) zLevel,
-				(double) ((float) (u + width) * f), (double) ((float) (v + 0) * f1));
-		tessellator.addVertexWithUV((double) (x + 0), (double) (y + 0), (double) zLevel,
-				(double) ((float) (u + 0) * f), (double) ((float) (v + 0) * f1));
-		tessellator.draw();
+
+		GL11.glBegin(GL11.GL_QUADS);
+		{
+			GL11.glTexCoord2d(0, 1);
+			GL11.glVertex3d(x, y + height, 0);
+			GL11.glTexCoord2d(1, 1);
+			GL11.glVertex3d(x + width, y + height, 0);
+			GL11.glTexCoord2d(1, 0);
+			GL11.glVertex3d(x + width, y, 0);
+			GL11.glTexCoord2d(0, 0);
+			GL11.glVertex3d(x, y, 0);
+		}
+		GL11.glEnd();
 	}
 
 }
