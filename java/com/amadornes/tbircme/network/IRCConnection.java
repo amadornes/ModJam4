@@ -202,20 +202,16 @@ public class IRCConnection {
 	private void onMessage(final String s) {
 
 		TheBestIRCModEver.log.log(Level.INFO, "[IRC] " + s);
-		
-		int space = s.indexOf(" ") + 1;
-		String key = s.substring(space);
-		System.out.println("Index: " + key.indexOf(" "));
 
-		if (key == "PING") {
+		if (s.startsWith("PING")) {
 			onPing(s);
 			return;
 		}
-		if (key == "004" && !connected) {
+		if (s.indexOf("004") >= 0 && !connected) {
 			connected = true;
 			return;
 		}
-		if (key == "PRIVMSG") {
+		if (s.indexOf(" PRIVMSG ") >= 0) {
 			String st = s.substring(s.indexOf(" PRIVMSG ") + " PRIVMSG ".length());
 			String sender = s.substring(s.indexOf(":") + 1, s.indexOf("!"));
 			String channel = st.substring(0, st.indexOf(" "));
@@ -232,7 +228,7 @@ public class IRCConnection {
 			}
 			return;
 		}
-		if(key == "KICK"){
+		if(s.indexOf(" KICK ") == s.indexOf(" ")){
 			new Thread(new Runnable() {
 				
 				@Override
@@ -245,8 +241,15 @@ public class IRCConnection {
 					join(st.substring(1, st.indexOf(" ")));
 				}
 			}).start();
+			return;
 		}
-		if(key == "474"){
+		if(s.indexOf(" MODE ") == s.indexOf(" ")){
+			String channel = "";
+			String who = "";
+			String perm = "";
+			return;
+		}
+		if(s.indexOf(" 474 ") == s.indexOf(" ")){
 			new Thread(new Runnable() {
 				
 				@Override
@@ -259,6 +262,7 @@ public class IRCConnection {
 					join(st.substring(1, st.indexOf(" ")));
 				}
 			}).start();
+			return;
 		}
 	}
 
