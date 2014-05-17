@@ -1,7 +1,6 @@
 package com.amadornes.tbircme.util;
 
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Map.Entry;
 
 import org.apache.commons.io.IOUtils;
@@ -17,10 +16,8 @@ public class EmoteAPI {
 
 	public static final void init() {
 		try {
-			URL u = new URL("http://twitchemotes.com/global.json");
-			URLConnection con = u.openConnection();
-			con.connect();
-			emotes = (JsonObject) new JsonParser().parse(IOUtils.toString(con.getInputStream()));
+			URL u = new URL("http://www.twitchemotes.com/global.json");
+			emotes = (JsonObject) new JsonParser().parse(IOUtils.toString(u));
 
 			for (Entry<String, JsonElement> e : emotes.entrySet()) {
 				String name = e.getKey();
