@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
 import com.amadornes.tbircme.Config;
 import com.amadornes.tbircme.network.Server;
@@ -32,7 +33,8 @@ public class EventHandler {
 				// he/she left
 				if (!nPlayers.contains(p))
 					for (Server s : Config.servers)
-						s.getConnection().onPlayerLeave(p);
+						if (s.shouldShowIngameParts())
+							s.getConnection().onPlayerLeave(p);
 			}
 			// Loop through the new list
 			for (String p : nPlayers) {
@@ -40,13 +42,23 @@ public class EventHandler {
 				// he/she joined
 				if (!players.contains(p))
 					for (Server s : Config.servers)
-						s.getConnection().onPlayerJoin(p);
+						if (s.shouldShowIngameJoins())
+							s.getConnection().onPlayerJoin(p);
 			}
 
 			players.clear();
 			players.addAll(nPlayers);
 			nPlayers.clear();
 			nPlayers = null;
+		}
+	}
+
+	@SubscribeEvent
+	public void onPlayerDie(LivingDeathEvent ev) {
+		if (ev.entity instanceof EntityPlayer) {
+			for (Server s : Config.servers)
+				if (s.shouldShowDeaths())
+					s.getConnection().onPlayerDie(ev.entity.getCommandSenderName(), ev);
 		}
 	}
 

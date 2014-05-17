@@ -19,6 +19,7 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
 import com.amadornes.tbircme.Config;
 import com.amadornes.tbircme.TheBestIRCModEver;
@@ -86,8 +87,9 @@ public class IRCConnection {
 					}
 				}
 				
-				if(password != null && !password.trim().equals(""))
-					sendRaw("PASS " + password, true, false);
+				if(password != null && password.trim().length() != 0){
+					sendRaw("PASS " + password);
+				}
 
 				boolean tryAgain = false;
 				int id = 0;
@@ -256,12 +258,16 @@ public class IRCConnection {
 	
 	public void onPlayerJoin(String p){
 		broadcast("* " + p + " has joined the game.");
-		System.out.println("Join!");
 	}
 	
 	public void onPlayerLeave(String p){
 		broadcast("* " + p + " has left the game.");
-		System.out.println("Leave!");
+	}
+	
+	public void onPlayerDie(String p, LivingDeathEvent ev){
+		try{
+			broadcast("* " + ev.source.func_151519_b(ev.entityLiving).getUnformattedTextForChat());
+		}catch(Exception ex){}
 	}
 
 	protected void onCommand(String channel, String sender, String command) {
@@ -287,7 +293,7 @@ public class IRCConnection {
 				if (c.getCommandName().equalsIgnoreCase(cmd))
 					is = true;
 				if (!is)
-					if (c.getCommandAliases() != null) {
+					if (c.getCommandAliases() != null) 
 						for (Object o2 : c.getCommandAliases()) {
 							String s = (String) o2;
 							if (s.equalsIgnoreCase(cmd)) {
@@ -295,7 +301,6 @@ public class IRCConnection {
 								break;
 							}
 						}
-					}
 				if (is) {
 					try {
 						commandSender.setSender("#" + channel);

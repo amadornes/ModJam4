@@ -42,7 +42,7 @@ public class IRCCommandSender implements ICommandSender {
 
 	@Override
 	public void addChatMessage(IChatComponent var1) {
-		con.chat(sender, " > " + var1.getUnformattedTextForChat() + " < ");
+		con.chat(sender.substring(1), " > " + var1.getUnformattedTextForChat() + " < ");
 	}
 
 	public void setSender(String sender) {
