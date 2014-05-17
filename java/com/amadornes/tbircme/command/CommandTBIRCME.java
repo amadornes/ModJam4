@@ -3,6 +3,9 @@ package com.amadornes.tbircme.command;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.amadornes.tbircme.gui.GuiClientConfig;
+
+import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
@@ -31,7 +34,7 @@ public class CommandTBIRCME extends CommandBase {
 			if (args.length >= 1) {
 				String cmd = args[0].toLowerCase();
 				if (cmd.equals("cfg")) {
-					// TODO Open config GUI
+					Minecraft.getMinecraft().displayGuiScreen(new GuiClientConfig());
 				} else if (cmd.equals("svcfg")) {
 					// TODO Open config GUI for the server
 				}

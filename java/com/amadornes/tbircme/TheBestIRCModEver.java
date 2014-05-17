@@ -73,8 +73,7 @@ public class TheBestIRCModEver {
 
 	@EventHandler
 	public void onServerStart(FMLServerStartingEvent ev) {
-		// TODO Re-enable command commandev.registerServerCommand(new
-		// CommandTBIRCME());
+
 	}
 
 	@EventHandler

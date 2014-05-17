@@ -1,11 +1,15 @@
 package com.amadornes.tbircme.render;
 
+import java.awt.image.BufferedImage;
 import java.util.List;
+
+import javax.imageio.ImageIO;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ChatLine;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiNewChat;
+import net.minecraft.client.renderer.texture.TextureUtil;
 import net.minecraft.entity.player.EntityPlayer.EnumChatVisibility;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -40,6 +44,7 @@ public class RenderHandler {
 		GL11.glEnable(GL11.GL_LINE_SMOOTH);
 		GL11.glEnable(GL11.GL_POLYGON_SMOOTH);
 		GL11.glEnable(GL11.GL_POINT_SMOOTH);
+		GL11.glShadeModel(GL11.GL_SMOOTH);
 
 		GuiNewChat chat = Minecraft.getMinecraft().ingameGUI.getChatGUI();
 		List chatLines = (List) ReflectionUtils.get(chat, "chatLines");
@@ -126,11 +131,11 @@ public class RenderHandler {
 					found = false;
 					Emote emote = null;
 					for (Emote e : TheBestIRCModEver.emotes) {
-						if (s.contains(" " + e + " ")
-								|| s.startsWith(e + " ")
+						if (s.contains(" " + e.getEmote() + " ")
+								|| s.startsWith(e.getEmote() + " ")
 								|| (s.startsWith(e.getEmote()) && s.length() == e.getEmote()
 										.length())
-								|| s.endsWith(" " + e)
+								|| s.endsWith(" " + e.getEmote())
 								|| (s.endsWith(e.getEmote()) && s.length() == e.getEmote().length())) {
 							if (!e.hasFile()) {
 								e.download();
@@ -160,16 +165,41 @@ public class RenderHandler {
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
-		int emoteSize = 28;
+		double emoteSize = 28;
+		double renderSize = 14;
 		GL11.glPushMatrix();
 		{
-			Minecraft.getMinecraft().renderEngine.bindTexture(emote.getResource());
-			GL11.glColor4d(1, 1, 1, opacity);
-			GL11.glTranslated(x + 3, ev.resolution.getScaledHeight_double() - (9 * line) - 32
-					- (emoteSize / 4D), 0);
-			GL11.glScaled(0.5, 0.5, 1);
-			drawTexturedModalRect(0, 0, 0, 0, emoteSize, emoteSize);
-			GL11.glScaled(2, 2, 1);
+			try {
+				BufferedImage bi = null;
+				int tex;
+				if ((tex = emote.getTexture()) == -1 || (bi = emote.getImg()) == null) {
+					try {
+						bi = ImageIO.read(emote.getFile());
+						tex = TextureUtil.uploadTextureImage(GL11.glGenTextures(), bi);
+						emote.setTexture(tex);
+						emote.setImg(bi);
+					} catch (Exception ex) {
+
+					}
+				}
+
+				double mul = (renderSize) / ((double) bi.getWidth());
+				if (mul * bi.getHeight() > renderSize) {
+					mul = (renderSize) / ((double) bi.getHeight());
+				}
+
+				GL11.glBindTexture(GL11.GL_TEXTURE_2D, tex);
+
+				GL11.glColor4d(1, 1, 1, opacity);
+				GL11.glTranslated(
+						x + 3 + ((renderSize / 2D) - ((mul * bi.getWidth()) / 2D)),
+						ev.resolution.getScaledHeight_double() - (9 * line) - 32 - (emoteSize / 4D),
+						0);
+				GL11.glScaled(mul, mul, 1);
+				drawTexturedModalRect(0, 0, 0, 0, bi.getWidth(), bi.getHeight());
+				GL11.glScaled(1D / mul, 1D / mul, 1);
+			} catch (Exception e) {
+			}
 		}
 		GL11.glPopMatrix();
 

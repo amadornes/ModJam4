@@ -1,9 +1,8 @@
 package com.amadornes.tbircme.util;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
-
-import net.minecraft.util.ResourceLocation;
 
 import org.apache.commons.io.FileUtils;
 
@@ -14,11 +13,15 @@ public class Emote {
 	private String emote;
 	private String url;
 	private File file;
+	private boolean hasFile = false;
+	private int tex = -1;
+	private BufferedImage img;
 
 	public Emote(String name, String url) {
 		this.emote = name;
 		this.url = url;
-		this.file = new File("./mods/" + ModInfo.MODID + "/emotes/" + emote + ".png");
+		this.file = new File("../../mods/" + ModInfo.MODID + "/emotes/" + emote + ".png");
+		hasFile = this.file.exists();
 	}
 
 	public void download() {
@@ -28,7 +31,9 @@ public class Emote {
 			public void run() {
 				try {
 					FileUtils.copyURLToFile(new URL(url), file);
+					hasFile = true;
 				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}).start();
@@ -44,11 +49,23 @@ public class Emote {
 	}
 
 	public boolean hasFile() {
-		return file.exists();
+		return hasFile;
 	}
 
-	public ResourceLocation getResource() {
-		return new ResourceLocation(getFilePath());
+	public int getTexture() {
+		return tex;
+	}
+
+	public void setTexture(int texture) {
+		this.tex = texture;
+	}
+	
+	public BufferedImage getImg() {
+		return img;
+	}
+	
+	public void setImg(BufferedImage img) {
+		this.img = img;
 	}
 
 	public String getEmote() {
