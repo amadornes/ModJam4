@@ -202,16 +202,20 @@ public class IRCConnection {
 	private void onMessage(final String s) {
 
 		TheBestIRCModEver.log.log(Level.INFO, "[IRC] " + s);
+		
+		int space = s.indexOf(" ") + 1;
+		String key = s.substring(space);
+		System.out.println("Index: " + key.indexOf(" "));
 
-		if (s.startsWith("PING")) {
+		if (key == "PING") {
 			onPing(s);
 			return;
 		}
-		if (s.indexOf("004") >= 0 && !connected) {
+		if (key == "004" && !connected) {
 			connected = true;
 			return;
 		}
-		if (s.indexOf(" PRIVMSG ") >= 0) {
+		if (key == "PRIVMSG") {
 			String st = s.substring(s.indexOf(" PRIVMSG ") + " PRIVMSG ".length());
 			String sender = s.substring(s.indexOf(":") + 1, s.indexOf("!"));
 			String channel = st.substring(0, st.indexOf(" "));
@@ -228,7 +232,7 @@ public class IRCConnection {
 			}
 			return;
 		}
-		if(s.indexOf(" KICK ") == s.indexOf(" ")){
+		if(key == "KICK"){
 			new Thread(new Runnable() {
 				
 				@Override
@@ -242,7 +246,7 @@ public class IRCConnection {
 				}
 			}).start();
 		}
-		if(s.indexOf(" 474 ") == s.indexOf(" ")){
+		if(key == "474"){
 			new Thread(new Runnable() {
 				
 				@Override

@@ -12,7 +12,6 @@ import com.amadornes.tbircme.command.CommandTBIRCME;
 import com.amadornes.tbircme.gui.GuiHandler;
 import com.amadornes.tbircme.network.IRCConnection;
 import com.amadornes.tbircme.packet.PacketHandler;
-import com.amadornes.tbircme.permissions.Player;
 import com.amadornes.tbircme.proxy.CommonProxy;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -21,7 +20,6 @@ import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerAboutToStartEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
@@ -46,7 +44,7 @@ public class TheBestIRCModEver {
 	public static List<IRCConnection> connections = new ArrayList<IRCConnection>();
 
 	public static EnumMap<Side, FMLEmbeddedChannel> channels;
-	
+
 	public static boolean canChangeServerConfig = false;
 
 	@EventHandler
@@ -58,15 +56,10 @@ public class TheBestIRCModEver {
 	public void init(FMLInitializationEvent ev) {
 		channels = NetworkRegistry.INSTANCE.newChannel(ModInfo.MODID, new PacketHandler());
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
-		
+
 		com.amadornes.tbircme.handler.EventHandler handler = new com.amadornes.tbircme.handler.EventHandler();
 		MinecraftForge.EVENT_BUS.register(handler);
 		FMLCommonHandler.instance().bus().register(handler);
-	}
-
-	@EventHandler
-	public void postInit(FMLPostInitializationEvent ev) {
-		new Player("test").getPermissions();
 	}
 
 	@EventHandler
