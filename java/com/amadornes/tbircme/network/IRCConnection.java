@@ -21,12 +21,12 @@ import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
-import com.amadornes.tbircme.Config;
 import com.amadornes.tbircme.TheBestIRCModEver;
 import com.amadornes.tbircme.exception.REAlreadyConnected;
 import com.amadornes.tbircme.exception.REErrorConnecting;
 import com.amadornes.tbircme.exception.RENotConnected;
 import com.amadornes.tbircme.exception.RENullHost;
+import com.amadornes.tbircme.util.Config;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 

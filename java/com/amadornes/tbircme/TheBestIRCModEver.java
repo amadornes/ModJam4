@@ -12,6 +12,7 @@ import com.amadornes.tbircme.command.CommandTBIRCME;
 import com.amadornes.tbircme.gui.GuiHandler;
 import com.amadornes.tbircme.network.IRCConnection;
 import com.amadornes.tbircme.packet.PacketHandler;
+import com.amadornes.tbircme.permissions.Player;
 import com.amadornes.tbircme.proxy.CommonProxy;
 
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -65,7 +66,7 @@ public class TheBestIRCModEver {
 
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent ev) {
-
+		new Player("test").getPermissions();
 	}
 
 	@EventHandler

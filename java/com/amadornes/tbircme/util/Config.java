@@ -1,4 +1,4 @@
-package com.amadornes.tbircme;
+package com.amadornes.tbircme.util;
 
 import java.util.ArrayList;
 import java.util.List;

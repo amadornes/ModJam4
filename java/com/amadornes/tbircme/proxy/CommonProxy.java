@@ -6,9 +6,9 @@ import java.util.List;
 
 import net.minecraftforge.common.config.Configuration;
 
-import com.amadornes.tbircme.Config;
 import com.amadornes.tbircme.ModInfo;
 import com.amadornes.tbircme.network.Server;
+import com.amadornes.tbircme.util.Config;
 
 public class CommonProxy {
 
