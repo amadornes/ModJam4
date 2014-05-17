@@ -26,6 +26,7 @@ import com.amadornes.tbircme.exception.REAlreadyConnected;
 import com.amadornes.tbircme.exception.REErrorConnecting;
 import com.amadornes.tbircme.exception.RENotConnected;
 import com.amadornes.tbircme.exception.RENullHost;
+import com.amadornes.tbircme.permissions.User;
 import com.amadornes.tbircme.util.Config;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -45,7 +46,7 @@ public class IRCConnection {
 
 	private boolean connected = false;
 
-	private List<String> channels = new ArrayList<String>();
+	private List<Channel> channels = new ArrayList<Channel>();
 
 	private IRCCommandSender commandSender;
 
@@ -78,24 +79,22 @@ public class IRCConnection {
 
 				r = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				w = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-				
-				if(password != null && password.trim().length() != 0){
+
+				if (password != null && password.trim().length() != 0) {
 					sendRaw("PASS " + password);
 					System.out.println("USING PASSWORD!!!!!");
-				}else{
+				} else {
 					System.out.println("NOT USING PASSWORD!!!!!");
 				}
 
 				// Clear incoming messages
-				/*{
-					long start = System.currentTimeMillis();
-					boolean received = false;
-					String line = "";
-					while ((line = r.readLine()) != null && (r.ready() || !received) && System.currentTimeMillis() - start < 3000) {
-						System.out.println("R: " + line);
-						received = true;
-					}
-				}*/
+				/*
+				 * { long start = System.currentTimeMillis(); boolean received =
+				 * false; String line = ""; while ((line = r.readLine()) != null
+				 * && (r.ready() || !received) && System.currentTimeMillis() -
+				 * start < 3000) { System.out.println("R: " + line); received =
+				 * true; } }
+				 */
 
 				boolean tryAgain = false;
 				int id = 0;
@@ -136,8 +135,8 @@ public class IRCConnection {
 	public void disconnect() {
 		shouldDisconnect = true;
 	}
-	
-	public void ragequit(){
+
+	public void ragequit() {
 		sendRaw("QUIT");
 		try {
 			socket.close();
@@ -174,7 +173,7 @@ public class IRCConnection {
 
 		sendRaw("JOIN #" + channel);
 		if (!channels.contains(channel.toLowerCase()))
-			channels.add(channel.toLowerCase());
+			channels.add(new Channel(channel.toLowerCase()));
 	}
 
 	public void part(String channel) {
@@ -194,8 +193,8 @@ public class IRCConnection {
 	}
 
 	public void broadcast(String message) {
-		for (String c : channels) {
-			chat(c, message);
+		for (Channel c : channels) {
+			chat(c.getChannel(), message);
 		}
 	}
 
@@ -207,10 +206,12 @@ public class IRCConnection {
 			onPing(s);
 			return;
 		}
+
 		if (s.indexOf("004") >= 0 && !connected) {
 			connected = true;
 			return;
 		}
+
 		if (s.indexOf(" PRIVMSG ") >= 0) {
 			String st = s.substring(s.indexOf(" PRIVMSG ") + " PRIVMSG ".length());
 			String sender = s.substring(s.indexOf(":") + 1, s.indexOf("!"));
@@ -218,7 +219,8 @@ public class IRCConnection {
 			String msg = st.substring(st.indexOf(" ") + 2);
 
 			if (channel.startsWith("#")) {
-				if (MinecraftServer.getServer() != null && MinecraftServer.getServer().isServerRunning()) {
+				if (MinecraftServer.getServer() != null
+						&& MinecraftServer.getServer().isServerRunning()) {
 					if (msg.startsWith("!")) {
 						onCommand(channel.substring(1), sender, msg.substring(1));
 					} else {
@@ -228,9 +230,10 @@ public class IRCConnection {
 			}
 			return;
 		}
-		if(s.indexOf(" KICK ") == s.indexOf(" ")){
+
+		if (s.indexOf(" KICK ") == s.indexOf(" ")) {
 			new Thread(new Runnable() {
-				
+
 				@Override
 				public void run() {
 					try {
@@ -243,15 +246,78 @@ public class IRCConnection {
 			}).start();
 			return;
 		}
-		if(s.indexOf(" MODE ") == s.indexOf(" ")){
-			String channel = "";
-			String who = "";
-			String perm = "";
+
+		if (s.indexOf(" MODE ") == s.indexOf(" ")) {
+			if (!s.endsWith("+i")) {
+				String st = s.substring(s.indexOf(" ") + 1);
+				st = st.substring(st.indexOf(" ") + 1);
+
+				String ch = st.substring(0, st.indexOf(" "));
+				if (!ch.startsWith("#"))
+					return;
+				ch = ch.substring(1);
+				Channel channel = null;
+				for (Channel c : channels)
+					if (c.getChannel().equalsIgnoreCase(ch))
+						channel = c;
+				st = st.substring(st.indexOf(" ") + 1);
+				String perm = st.substring(0, st.indexOf(" "));
+				st = st.substring(st.indexOf(" ") + 1);
+				String who = st;
+
+				User u = channel.getUser(who);
+				for (int i = 0; i < perm.length(); i += 2) {
+					String mod = perm.substring(i, i + 1);
+					String p = perm.substring(i + 1, i + 2);
+
+					boolean state = mod == "+";
+					if (p.equals("v"))
+						u.setVoice(state);
+					if (p.equals("o"))
+						u.setOp(state);
+				}
+			}
+
 			return;
 		}
-		if(s.indexOf(" 474 ") == s.indexOf(" ")){
+
+		if (s.indexOf(" JOIN ") == s.indexOf(" ") || s.indexOf(" PART ") == s.indexOf(" ")) {
+			String st = s.substring(s.indexOf(" ") + 1);
+			st = st.substring(st.indexOf(" ") + 1);
+
+			String ch = st.substring(1, st.contains(" ") ? st.indexOf(" ") : st.length());
+			Channel channel = null;
+			for (Channel c : channels)
+				if (c.getChannel().equalsIgnoreCase(ch))
+					channel = c;
+			String who = s.substring(s.indexOf(":"), s.indexOf("!"));
+
+			User u = channel.getUser(who);
+
+			if (s.indexOf(" JOIN ") == s.indexOf(" "))
+				u.setOnline(true);
+			if (s.indexOf(" PART ") == s.indexOf(" "))
+				u.setOnline(false);
+
+			return;
+		}
+
+		if (s.indexOf(" NICK ") == s.indexOf(" ")) {
+			String st = s.substring(s.indexOf(" ") + 1);
+			st = st.substring(st.indexOf(" ") + 1);
+
+			String nick = st.substring(1, st.contains(" ") ? st.indexOf(" ") : st.length());
+			String who = s.substring(s.indexOf(":"), s.indexOf("!"));
+
+			for(Channel c : channels)
+				c.getUser(who).setUsername(nick);
+
+			return;
+		}
+
+		if (s.indexOf(" 474 ") == s.indexOf(" ")) {
 			new Thread(new Runnable() {
-				
+
 				@Override
 				public void run() {
 					try {
@@ -274,7 +340,8 @@ public class IRCConnection {
 	protected void onChatMessage(String channel, String sender, String message) {
 		String msg = "[" + channel + "] <" + sender + "> " + message;
 		if (message.trim().startsWith("ACTION ") && !message.startsWith("ACTION ")) {
-			msg = "[" + channel + "] * " + sender + " " + message.trim().substring("ACTION ".length());
+			msg = "[" + channel + "] * " + sender + " "
+					+ message.trim().substring("ACTION ".length());
 		}
 
 		for (Object o : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
@@ -298,19 +365,20 @@ public class IRCConnection {
 			broadcast("* \002" + ev.sender.getCommandSenderName() + "\002 " + msg);
 		}
 	}
-	
-	public void onPlayerJoin(String p){
+
+	public void onPlayerJoin(String p) {
 		broadcast("* " + p + " has joined the game.");
 	}
-	
-	public void onPlayerLeave(String p){
+
+	public void onPlayerLeave(String p) {
 		broadcast("* " + p + " has left the game.");
 	}
-	
-	public void onPlayerDie(String p, LivingDeathEvent ev){
-		try{
+
+	public void onPlayerDie(String p, LivingDeathEvent ev) {
+		try {
 			broadcast("* " + ev.source.func_151519_b(ev.entityLiving).getUnformattedTextForChat());
-		}catch(Exception ex){}
+		} catch (Exception ex) {
+		}
 	}
 
 	protected void onCommand(String channel, String sender, String command) {
@@ -319,12 +387,14 @@ public class IRCConnection {
 
 			List<String> arguments = new ArrayList<String>();
 			if (realCommand.indexOf(" ") > 0) {
-				StringTokenizer st = new StringTokenizer(realCommand.substring(realCommand.indexOf(" ")).trim(), " ");
+				StringTokenizer st = new StringTokenizer(realCommand.substring(
+						realCommand.indexOf(" ")).trim(), " ");
 				while (st.hasMoreTokens())
 					arguments.add(st.nextToken());
 			}
 
-			String cmd = realCommand.contains(" ") ? realCommand.substring(0, realCommand.indexOf(" ")).trim() : realCommand.trim();
+			String cmd = realCommand.contains(" ") ? realCommand.substring(0,
+					realCommand.indexOf(" ")).trim() : realCommand.trim();
 			String[] args = arguments.toArray(new String[] {});
 
 			arguments.clear();
@@ -336,7 +406,7 @@ public class IRCConnection {
 				if (c.getCommandName().equalsIgnoreCase(cmd))
 					is = true;
 				if (!is)
-					if (c.getCommandAliases() != null) 
+					if (c.getCommandAliases() != null)
 						for (Object o2 : c.getCommandAliases()) {
 							String s = (String) o2;
 							if (s.equalsIgnoreCase(cmd)) {
