@@ -1,6 +1,7 @@
 package com.amadornes.tbircme.network;
 
 import net.minecraft.command.ICommandSender;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
@@ -32,7 +33,7 @@ public class IRCCommandSender implements ICommandSender {
 
 	@Override
 	public IChatComponent func_145748_c_() {
-		return null;
+		return new ChatComponentText("");
 	}
 
 	@Override

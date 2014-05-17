@@ -72,24 +72,30 @@ public class IRCConnection {
 			TheBestIRCModEver.log.log(Level.INFO, "Connecting to " + h + " on port " + p + "!");
 
 			try {
+				TheBestIRCModEver.log.log(Level.INFO, "Opening socket");
 				socket = new Socket(h, p);
+				TheBestIRCModEver.log.log(Level.INFO, "Opened socket");
 
 				r = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				w = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 				
 				if(password != null && password.trim().length() != 0){
 					sendRaw("PASS " + password);
+					System.out.println("USING PASSWORD!!!!!");
+				}else{
+					System.out.println("NOT USING PASSWORD!!!!!");
 				}
 
 				// Clear incoming messages
-				{
+				/*{
+					long start = System.currentTimeMillis();
 					boolean received = false;
 					String line = "";
-					while ((line = r.readLine()) != null && (r.ready() || !received)) {
-						line = (String) line;
+					while ((line = r.readLine()) != null && (r.ready() || !received) && System.currentTimeMillis() - start < 3000) {
+						System.out.println("R: " + line);
 						received = true;
 					}
-				}
+				}*/
 
 				boolean tryAgain = false;
 				int id = 0;
@@ -193,7 +199,7 @@ public class IRCConnection {
 		}
 	}
 
-	private void onMessage(String s) {
+	private void onMessage(final String s) {
 
 		TheBestIRCModEver.log.log(Level.INFO, "[IRC] " + s);
 
@@ -220,6 +226,35 @@ public class IRCConnection {
 					}
 				}
 			}
+			return;
+		}
+		if(s.indexOf(" KICK ") == s.indexOf(" ")){
+			new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					try {
+						Thread.sleep(1000);
+					} catch (Exception e) {
+					}
+					String st = s.substring(s.indexOf(" ") + " KICK ".length());
+					join(st.substring(1, st.indexOf(" ")));
+				}
+			}).start();
+		}
+		if(s.indexOf(" 474 ") == s.indexOf(" ")){
+			new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					try {
+						Thread.sleep(1000);
+					} catch (Exception e) {
+					}
+					String st = s.substring(s.indexOf(" ") + (" 474 " + nick + " ").length());
+					join(st.substring(1, st.indexOf(" ")));
+				}
+			}).start();
 		}
 	}
 
