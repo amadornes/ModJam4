@@ -19,6 +19,8 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 
 import com.amadornes.tbircme.Config;
 import com.amadornes.tbircme.TheBestIRCModEver;
@@ -86,7 +88,7 @@ public class IRCConnection {
 					}
 				}
 				
-				if(password != null)
+				if(password != null && !password.trim().equals(""))
 					sendRaw("PASS " + password, true, false);
 
 				boolean tryAgain = false;
@@ -252,6 +254,14 @@ public class IRCConnection {
 			msg = msg.trim();
 			broadcast("* \002" + ev.sender.getCommandSenderName() + "\002 " + msg);
 		}
+	}
+	
+	public void onPlayerJoin(EntityJoinWorldEvent ev){
+		EntityPlayer p = ((EntityPlayer)ev.entity);
+		broadcast("* " + p.getCommandSenderName() + " has joined the game.");
+	}
+	
+	public void onPlayerLeave(EntityEvent ev){
 	}
 
 	protected void onCommand(String channel, String sender, String command) {

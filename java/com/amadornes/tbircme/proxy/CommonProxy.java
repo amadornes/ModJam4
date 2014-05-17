@@ -31,7 +31,7 @@ public class CommonProxy {
 	}
 
 	private void loadServerConfig(File file) {
-		String host = "", username = "";
+		String host = "", username = "", serverpass = null;
 		List<String> commands = new ArrayList<String>(), channels = new ArrayList<String>();
 		
 		Configuration cfg = new Configuration(file);
@@ -40,6 +40,7 @@ public class CommonProxy {
 			// Login section
 			{
 				host = cfg.get("login", "host", "", "Host the bridge will connect to (for example: irc.esper.net). Can include a port.").getString().trim();
+				serverpass = cfg.get("login", "pass", "", "The server's password (if using twitch, this is your oauth code).").getString().trim();
 				username = cfg.get("login", "username", "TheBestIRCModEver", "Username the bridge will use when connected to this server.").getString().trim();
 				String[] cmds = cfg.get("login", "commands", new String[]{}, "Commands to run after logging in (like Nickserv identify).").getStringList();
 				for(String s : cmds)
@@ -57,7 +58,7 @@ public class CommonProxy {
 		if(host == null || host == "" || username == null || username == "" || channels.size() == 0)
 			return;
 		
-		Config.servers.add(new Server(host, username, channels, commands));
+		Config.servers.add(new Server(host, serverpass.trim().equals("") ? null : serverpass, username, channels, commands));
 	}
 
 	private void createExampleServerConfig(File file) {

@@ -62,5 +62,9 @@ public class Server {
 	public void disconnect(){
 		irc.ragequit();
 	}
+	
+	public IRCConnection getConnection() {
+		return irc;
+	}
 
 }

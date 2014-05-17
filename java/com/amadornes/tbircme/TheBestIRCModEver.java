@@ -5,6 +5,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.logging.Logger;
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 
 import com.amadornes.tbircme.command.CommandTBIRCME;
@@ -55,6 +56,8 @@ public class TheBestIRCModEver {
 	public void init(FMLInitializationEvent ev) {
 		channels = NetworkRegistry.INSTANCE.newChannel(ModInfo.MODID, new PacketHandler());
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
+		
+		MinecraftForge.EVENT_BUS.register(new com.amadornes.tbircme.handler.EventHandler());
 	}
 
 	@EventHandler

@@ -3,18 +3,10 @@ package com.amadornes.tbircme.command;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.client.gui.GuiMainMenu;
-import net.minecraft.client.gui.GuiOptions;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
-
-import com.amadornes.tbircme.TheBestIRCModEver;
-import com.amadornes.tbircme.gui.GuiClientConfig;
-
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.network.NetworkRegistry;
 
 public class CommandTBIRCME extends CommandBase {
 
@@ -30,21 +22,21 @@ public class CommandTBIRCME extends CommandBase {
 
 	@Override
 	public void processCommand(ICommandSender sender, String[] args) {
-		if(sender instanceof EntityPlayer){
-			EntityPlayer p = (EntityPlayer) sender;
+		if (sender instanceof EntityPlayer) {
+			//EntityPlayer p = (EntityPlayer) sender;
 			if (args.length == 0) {
 				sender.addChatMessage(new ChatComponentText("Available commands: cfg, svcfg"));
 			}
 
 			if (args.length >= 1) {
 				String cmd = args[0].toLowerCase();
-				if(cmd.equals("cfg")){
-					//TODO Open config GUI
-				}else if(cmd.equals("svcfg")){
-					//TODO Open config GUI for the server
+				if (cmd.equals("cfg")) {
+					// TODO Open config GUI
+				} else if (cmd.equals("svcfg")) {
+					// TODO Open config GUI for the server
 				}
 			}
-		}else{
+		} else {
 			sender.addChatMessage(new ChatComponentText("You must be a player in order to use this command."));
 		}
 	}
