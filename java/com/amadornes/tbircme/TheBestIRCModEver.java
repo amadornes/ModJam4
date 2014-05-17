@@ -14,6 +14,7 @@ import com.amadornes.tbircme.network.IRCConnection;
 import com.amadornes.tbircme.packet.PacketHandler;
 import com.amadornes.tbircme.proxy.CommonProxy;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
@@ -57,7 +58,9 @@ public class TheBestIRCModEver {
 		channels = NetworkRegistry.INSTANCE.newChannel(ModInfo.MODID, new PacketHandler());
 		NetworkRegistry.INSTANCE.registerGuiHandler(this, new GuiHandler());
 		
-		MinecraftForge.EVENT_BUS.register(new com.amadornes.tbircme.handler.EventHandler());
+		com.amadornes.tbircme.handler.EventHandler handler = new com.amadornes.tbircme.handler.EventHandler();
+		MinecraftForge.EVENT_BUS.register(handler);
+		FMLCommonHandler.instance().bus().register(handler);
 	}
 
 	@EventHandler

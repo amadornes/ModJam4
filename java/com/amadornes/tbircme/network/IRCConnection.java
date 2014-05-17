@@ -19,8 +19,6 @@ import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.ServerChatEvent;
-import net.minecraftforge.event.entity.EntityEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 
 import com.amadornes.tbircme.Config;
 import com.amadornes.tbircme.TheBestIRCModEver;
@@ -256,12 +254,14 @@ public class IRCConnection {
 		}
 	}
 	
-	public void onPlayerJoin(EntityJoinWorldEvent ev){
-		EntityPlayer p = ((EntityPlayer)ev.entity);
-		broadcast("* " + p.getCommandSenderName() + " has joined the game.");
+	public void onPlayerJoin(String p){
+		broadcast("* " + p + " has joined the game.");
+		System.out.println("Join!");
 	}
 	
-	public void onPlayerLeave(EntityEvent ev){
+	public void onPlayerLeave(String p){
+		broadcast("* " + p + " has left the game.");
+		System.out.println("Leave!");
 	}
 
 	protected void onCommand(String channel, String sender, String command) {
