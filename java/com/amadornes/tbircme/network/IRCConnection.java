@@ -24,7 +24,6 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import com.amadornes.tbircme.TheBestIRCModEver;
 import com.amadornes.tbircme.exception.REAlreadyConnected;
 import com.amadornes.tbircme.exception.REErrorConnecting;
-import com.amadornes.tbircme.exception.RENotConnected;
 import com.amadornes.tbircme.exception.RENullHost;
 import com.amadornes.tbircme.permissions.User;
 import com.amadornes.tbircme.util.Config;
@@ -32,6 +31,8 @@ import com.amadornes.tbircme.util.Config;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class IRCConnection {
+
+	private Server server;
 
 	private String host = null;
 	private String password = null;
@@ -50,9 +51,10 @@ public class IRCConnection {
 
 	private IRCCommandSender commandSender;
 
-	public IRCConnection(final String host, String nick, String password) {
+	public IRCConnection(Server server, final String host, String nick, String password) {
 		if (host == null)
 			throw new RENullHost();
+		this.server = server;
 		this.host = host;
 		this.nick = nick;
 		this.password = password;
@@ -61,8 +63,12 @@ public class IRCConnection {
 		commandSender = new IRCCommandSender(this, host);
 	}
 
-	public IRCConnection(final String host, String nick) {
-		this(host, nick, null);
+	public IRCConnection(Server server, final String host, String nick) {
+		this(server, host, nick, null);
+	}
+
+	public Server getServer() {
+		return server;
 	}
 
 	public void connect() {
@@ -169,16 +175,16 @@ public class IRCConnection {
 
 	public void join(String channel) {
 		if (!isConnected())
-			throw new RENotConnected();
+			return;
 
 		sendRaw("JOIN #" + channel);
 		if (!channels.contains(channel.toLowerCase()))
-			channels.add(new Channel(channel.toLowerCase()));
+			channels.add(new Channel(server, channel.toLowerCase()));
 	}
 
 	public void part(String channel) {
 		if (!isConnected())
-			throw new RENotConnected();
+			return;
 
 		sendRaw("PART #" + channel);
 		if (channels.contains(channel.toLowerCase()))
@@ -187,7 +193,7 @@ public class IRCConnection {
 
 	public void chat(String channel, String message) {
 		if (!isConnected())
-			throw new RENotConnected();
+			return;
 
 		sendRaw("PRIVMSG #" + channel + " :" + message);
 	}
@@ -232,18 +238,26 @@ public class IRCConnection {
 		}
 
 		if (s.indexOf(" KICK ") == s.indexOf(" ")) {
-			new Thread(new Runnable() {
+			if (s.substring(0, s.lastIndexOf(":")).contains(nick)) {
+				new Thread(new Runnable() {
 
-				@Override
-				public void run() {
-					try {
-						Thread.sleep(1000);
-					} catch (Exception e) {
+					@Override
+					public void run() {
+						try {
+							Thread.sleep(1000);
+						} catch (Exception e) {
+						}
+						String st = s.substring(s.indexOf(" ") + " KICK ".length());
+						join(st.substring(1, st.indexOf(" ")));
 					}
-					String st = s.substring(s.indexOf(" ") + " KICK ".length());
-					join(st.substring(1, st.indexOf(" ")));
-				}
-			}).start();
+				}).start();
+			} else {
+				String who = s.substring(s.indexOf(" ") + 1);
+				who = s.substring(s.indexOf(" ") + 1);
+				who = s.substring(s.indexOf(" ") + 1, s.indexOf(" :"));
+				if (server.shouldShowIRCParts())
+					broadcast("* " + who + " has left the channel (" + ").");
+			}
 			return;
 		}
 
@@ -290,16 +304,51 @@ public class IRCConnection {
 			for (Channel c : channels)
 				if (c.getChannel().equalsIgnoreCase(ch))
 					channel = c;
-			String who = s.substring(s.indexOf(":"), s.indexOf("!"));
-
+			String who = s.substring(s.indexOf(":") + 1, s.indexOf("!"));
+			if (who.equalsIgnoreCase(nick))
+				return;
 			User u = channel.getUser(who);
 
-			if (s.indexOf(" JOIN ") == s.indexOf(" "))
+			if (s.indexOf(" JOIN ") == s.indexOf(" ")) {
 				u.setOnline(true);
-			if (s.indexOf(" PART ") == s.indexOf(" "))
+				if (server.shouldShowIRCJoins())
+					broadcast("* " + who + " has joined the channel.");
+			}
+			if (s.indexOf(" PART ") == s.indexOf(" ")) {
 				u.setOnline(false);
+				if (server.shouldShowIRCParts())
+					broadcast("* " + who + " has left the channel (" + ").");
+			}
 
 			return;
+		}
+
+		if (s.indexOf(" 353 ") == s.indexOf(" ")) {
+			String st = s.substring(s.indexOf(" ") + 1);
+			st = st.substring(st.indexOf(" ") + 1);
+			st = st.substring(st.indexOf(" ") + 1);
+			st = st.substring(st.indexOf(" ") + 1);
+
+			String ch = st.substring(1, st.contains(" ") ? st.indexOf(" ") : st.length());
+			Channel channel = null;
+			for (Channel c : channels)
+				if (c.getChannel().equalsIgnoreCase(ch))
+					channel = c;
+			st = st.substring(st.indexOf(" ") + 1);
+			StringTokenizer strt = new StringTokenizer(st, " ");
+			while (strt.hasMoreTokens()) {
+				String us = strt.nextToken();
+				boolean op = us.contains("@");
+				boolean voice = us.contains("+");
+
+				String username = us.substring(Math.max(0,
+						Math.max(us.indexOf("@") + 1, us.indexOf("+") + 1)));
+				User u = new User(channel, username, true, op, voice);
+
+				System.out.println(us + " -> " + username + " " + op + " " + voice);
+
+				channel.addUser(u);
+			}
 		}
 
 		if (s.indexOf(" NICK ") == s.indexOf(" ")) {
@@ -309,7 +358,7 @@ public class IRCConnection {
 			String nick = st.substring(1, st.contains(" ") ? st.indexOf(" ") : st.length());
 			String who = s.substring(s.indexOf(":"), s.indexOf("!"));
 
-			for(Channel c : channels)
+			for (Channel c : channels)
 				c.getUser(who).setUsername(nick);
 
 			return;
@@ -367,16 +416,20 @@ public class IRCConnection {
 	}
 
 	public void onPlayerJoin(String p) {
-		broadcast("* " + p + " has joined the game.");
+		if (server.shouldShowIngameJoins())
+			broadcast("* " + p + " has joined the game.");
 	}
 
 	public void onPlayerLeave(String p) {
-		broadcast("* " + p + " has left the game.");
+		if (server.shouldShowIngameParts())
+			broadcast("* " + p + " has left the game.");
 	}
 
 	public void onPlayerDie(String p, LivingDeathEvent ev) {
 		try {
-			broadcast("* " + ev.source.func_151519_b(ev.entityLiving).getUnformattedTextForChat());
+			if (server.shouldShowDeaths())
+				broadcast("* "
+						+ ev.source.func_151519_b(ev.entityLiving).getUnformattedTextForChat());
 		} catch (Exception ex) {
 		}
 	}
@@ -416,6 +469,18 @@ public class IRCConnection {
 						}
 				if (is) {
 					try {
+						Channel ch = null;
+						for (Channel c2 : channels)
+							if (c2.getChannel().equalsIgnoreCase(channel))
+								ch = c2;
+
+						if (!ch.getUser(sender).canRunCommand(command)) {
+							chat(channel,
+									sender
+											+ " > ERROR! You don't have the permission to run this command! < ");
+							break;
+						}
+
 						commandSender.setSender("#" + channel);
 						c.processCommand(commandSender, args);
 					} catch (Exception ex) {

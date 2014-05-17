@@ -37,53 +37,65 @@ public class CommonProxy {
 
 		Configuration cfg = new Configuration(file);
 		cfg.load();
+		// Login section
 		{
-			// Login section
-			{
-				host = cfg
-						.get("login", "host", "",
-								"Host the bridge will connect to (for example: irc.esper.net). Can include a port.")
-						.getString().trim();
-				serverpass = cfg
-						.get("login", "pass", "",
-								"The server's password (if using twitch, this is your oauth code).")
-						.getString().trim();
-				username = cfg
-						.get("login", "username", "TheBestIRCModEver",
-								"Username the bridge will use when connected to this server.")
-						.getString().trim();
-				String[] cmds = cfg.get("login", "commands", new String[] {},
-						"Commands to run after logging in (like Nickserv identify).")
-						.getStringList();
-				for (String s : cmds)
-					commands.add(s.trim());
-			}
-			// Channels section
-			{
-				String[] ch = cfg.get("channels", "channels", new String[] {},
-						"Channels that the bridge will work with. One on each line.")
-						.getStringList();
-				for (String s : ch)
-					channels.add(s.trim());
-			}
-			// Messages
-			{
-				showIngameJoins = cfg.get("messages", "showIngameJoins", true).getBoolean(true);
-				showIngameParts = cfg.get("messages", "showIngameParts", true).getBoolean(true);
-				showDeaths = cfg.get("messages", "showDeaths", true).getBoolean(true);
-				showIRCJoins = cfg.get("messages", "showIRCJoins", true).getBoolean(true);
-				showIRCParts = cfg.get("messages", "showIRCParts", true).getBoolean(true);
-			}
+			host = cfg
+					.get("login", "host", "",
+							"Host the bridge will connect to (for example: irc.esper.net). Can include a port.")
+					.getString().trim();
+			serverpass = cfg
+					.get("login", "pass", "",
+							"The server's password (if using twitch, this is your oauth code).")
+					.getString().trim();
+			username = cfg
+					.get("login", "username", "TheBestIRCModEver",
+							"Username the bridge will use when connected to this server.")
+					.getString().trim();
+			String[] cmds = cfg.get("login", "commands", new String[] {},
+					"Commands to run after logging in (like Nickserv identify).").getStringList();
+			for (String s : cmds)
+				commands.add(s.trim());
+		}
+		// Channels section
+		{
+			String[] ch = cfg.get("channels", "channels", new String[] {},
+					"Channels that the bridge will work with. One on each line.").getStringList();
+			for (String s : ch)
+				channels.add(s.trim());
+		}
+		// Messages
+		{
+			showIngameJoins = cfg.get("messages", "showIngameJoins", true).getBoolean(true);
+			showIngameParts = cfg.get("messages", "showIngameParts", true).getBoolean(true);
+			showDeaths = cfg.get("messages", "showDeaths", true).getBoolean(true);
+			showIRCJoins = cfg.get("messages", "showIRCJoins", true).getBoolean(true);
+			showIRCParts = cfg.get("messages", "showIRCParts", true).getBoolean(true);
+		}
+
+		if (host == null || host == "" || username == null || username == ""
+				|| channels.size() == 0) {
+			cfg.save();
+			return;
+		}
+		Server sv = new Server(host.trim(), serverpass.trim().length() == 0 ? null
+				: serverpass.trim(), username.trim(), channels, commands, showIngameJoins,
+				showIngameParts, showDeaths, showIRCJoins, showIRCParts);
+
+		// Permissions
+		{
+			String[] voice = cfg.get("permissions", "voiceCommands", new String[] {})
+					.getStringList();
+			String[] normal = cfg.get("permissions", "publicCommands", new String[] {})
+					.getStringList();
+
+			for (String s : voice)
+				sv.addVoiceCommand(s);
+			for (String s : normal)
+				sv.addCommand(s);
 		}
 		cfg.save();
 
-		if (host == null || host == "" || username == null || username == ""
-				|| channels.size() == 0)
-			return;
-
-		Config.servers.add(new Server(host.trim(), serverpass.trim().length() == 0 ? null
-				: serverpass.trim(), username.trim(), channels, commands, showIngameJoins,
-				showIngameParts, showDeaths, showIRCJoins, showIRCParts));
+		Config.servers.add(sv);
 	}
 
 	private void createExampleServerConfig(File file) {
@@ -113,6 +125,11 @@ public class CommonProxy {
 				cfg.get("messages", "showDeaths", true);
 				cfg.get("messages", "showIRCJoins", true);
 				cfg.get("messages", "showIRCParts", true);
+			}
+			// Permissions
+			{
+				cfg.get("permissions", "voiceCommands", new String[] {});
+				cfg.get("permissions", "publicCommands", new String[] {});
 			}
 		}
 		cfg.save();

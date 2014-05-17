@@ -1,5 +1,6 @@
 package com.amadornes.tbircme.network;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Server {
@@ -7,6 +8,7 @@ public class Server {
 	private String host, serverpass, username;
 	private List<String> channels, commands;
 	private boolean showIngameJoins, showIngameParts, showDeaths, showIRCJoins, showIRCParts;
+	private List<String> cmdVoice = new ArrayList<String>(), cmds = new ArrayList<String>();
 
 	private IRCConnection irc;
 
@@ -38,7 +40,7 @@ public class Server {
 		return channels;
 	}
 
-	public List<String> getCommands() {
+	public List<String> getStartupCommands() {
 		return commands;
 	}
 
@@ -48,7 +50,7 @@ public class Server {
 
 			@Override
 			public void run() {
-				final IRCConnection irc = new IRCConnection(host, username, serverpass);
+				final IRCConnection irc = new IRCConnection(me, host, username, serverpass);
 				me.irc = irc;
 				irc.connect();
 				irc.waitUntilConnected();
@@ -94,6 +96,30 @@ public class Server {
 
 	public boolean shouldShowIRCParts() {
 		return showIRCParts;
+	}
+
+	public List<String> getVoiceCommands() {
+		return cmdVoice;
+	}
+
+	public List<String> getCommands() {
+		return cmds;
+	}
+	
+	public void addVoiceCommand(String cmd){
+		cmdVoice.add(cmd);
+	}
+	
+	public void removeVoiceCommand(String cmd){
+		cmdVoice.remove(cmd);
+	}
+	
+	public void addCommand(String cmd){
+		cmds.add(cmd);
+	}
+	
+	public void removeCommand(String cmd){
+		cmds.remove(cmd);
 	}
 
 }
