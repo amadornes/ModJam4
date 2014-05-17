@@ -76,7 +76,7 @@ public class RenderHandler {
 
 		FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
 		int id = chatLines.indexOf(l);
-		int id2 = (id - ((int) ReflectionUtils.get(chat, "field_146250_j")));
+		int id2 = (id - ((Integer) ReflectionUtils.get(chat, "field_146250_j")));
 		if ((id2 + 1) * 9 > (isOpen ? Minecraft.getMinecraft().gameSettings.chatHeightFocused
 				: Minecraft.getMinecraft().gameSettings.chatHeightUnfocused) * 180 || id2 < 0)
 			return;
