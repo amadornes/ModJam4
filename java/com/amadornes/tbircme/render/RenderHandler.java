@@ -1,6 +1,10 @@
 package com.amadornes.tbircme.render;
 
+import java.lang.reflect.Field;
+import java.util.List;
+
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ChatLine;
 import net.minecraft.client.gui.GuiNewChat;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -12,28 +16,58 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
 public class RenderHandler {
 
+	@SuppressWarnings("rawtypes")
 	@SubscribeEvent
 	public void onRenderOverlayTick(RenderGameOverlayEvent ev) {
 		if (ev.type != ElementType.CHAT)
 			return;
 
-		int emoteSize = 14;
-		GuiNewChat chat = Minecraft.getMinecraft().ingameGUI.getChatGUI();
-
 		boolean lighting = GL11.glIsEnabled(GL11.GL_LIGHTING);
 		GL11.glDisable(GL11.GL_LIGHTING);
 
-		GL11.glPushMatrix();
-		{
-			GL11.glDisable(GL11.GL_TEXTURE_2D);
-			GL11.glColor4d(1, 0, 0, 1);
-			// drawTexturedModalRect(20, ev.resolution.getScaledHeight_double()
-			// - 8 - 32 - (emoteSize/2), 0, 0, emoteSize, emoteSize);
-			// drawTexturedModalRect(20, ev.resolution.getScaledHeight_double()
-			// - 32 - (emoteSize/2), 0, 0, emoteSize, emoteSize);
-			GL11.glEnable(GL11.GL_TEXTURE_2D);
+		int emoteSize = 14;
+		GuiNewChat chat = Minecraft.getMinecraft().ingameGUI.getChatGUI();
+		Field f = null;
+		;
+		try {
+			f = chat.getClass().getDeclaredField("chatLines");
+		} catch (Exception e) {
 		}
-		GL11.glPopMatrix();
+
+		if (f == null)
+			return;
+
+		f.setAccessible(true);
+		List chatLines = null;
+		try {
+			chatLines = (List) f.get(chat);
+		} catch (Exception e) {
+		}
+
+		if (chatLines == null)
+			return;
+
+		for (Object o : chatLines) {
+			ChatLine l = (ChatLine) o;
+			int id = chatLines.indexOf(o);
+			double x = 0;
+			
+			if(!l.func_151461_a().getUnformattedTextForChat().contains("Kappa"))
+				continue;
+			
+			
+			
+			GL11.glPushMatrix();
+			{
+				GL11.glDisable(GL11.GL_TEXTURE_2D);
+				GL11.glColor4d(1, 0, 0, 1);
+				drawTexturedModalRect(x,
+						ev.resolution.getScaledHeight_double() - (9 * id) - 32
+								- (emoteSize / 2), 0, 0, emoteSize, emoteSize);
+				GL11.glEnable(GL11.GL_TEXTURE_2D);
+			}
+			GL11.glPopMatrix();
+		}
 
 		if (lighting)
 			GL11.glEnable(GL11.GL_LIGHTING);
