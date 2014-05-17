@@ -1,9 +1,9 @@
 package com.amadornes.tbircme;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.minecraftforge.common.MinecraftForge;
@@ -13,6 +13,8 @@ import com.amadornes.tbircme.gui.GuiHandler;
 import com.amadornes.tbircme.network.IRCConnection;
 import com.amadornes.tbircme.packet.PacketHandler;
 import com.amadornes.tbircme.proxy.CommonProxy;
+import com.amadornes.tbircme.util.Emote;
+import com.amadornes.tbircme.util.EmoteAPI;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
@@ -47,12 +49,14 @@ public class TheBestIRCModEver {
 
 	public static boolean canChangeServerConfig = false;
 
-	public static List<String> emotes = new ArrayList<String>(
-			Arrays.asList(new String[] { "Kappa", "Keepo" }));
+	public static List<Emote> emotes = new ArrayList<Emote>();
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent ev) {
 		proxy.loadConfig(ev.getSuggestedConfigurationFile());
+		log.log(Level.INFO, "Loading emotes...");
+		EmoteAPI.init();
+		log.log(Level.INFO, "Emotes loaded!");
 	}
 
 	@EventHandler

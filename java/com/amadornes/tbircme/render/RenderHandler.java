@@ -7,15 +7,15 @@ import net.minecraft.client.gui.ChatLine;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.GuiNewChat;
 import net.minecraft.entity.player.EntityPlayer.EnumChatVisibility;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.IChatComponent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 
 import org.lwjgl.opengl.GL11;
 
-import com.amadornes.tbircme.ModInfo;
 import com.amadornes.tbircme.TheBestIRCModEver;
 import com.amadornes.tbircme.util.ChatComponentEmote;
+import com.amadornes.tbircme.util.Emote;
 import com.amadornes.tbircme.util.ReflectionUtils;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -43,14 +43,18 @@ public class RenderHandler {
 
 		GuiNewChat chat = Minecraft.getMinecraft().ingameGUI.getChatGUI();
 		List chatLines = (List) ReflectionUtils.get(chat, "chatLines");
+		List chatLines2 = (List) ReflectionUtils.get(chat, "field_146253_i");
 		boolean isOpen = chat.getChatOpen();
 
 		if (chatLines == null)
 			return;
 
+		int i = 0;
 		for (Object o : chatLines) {
 			ChatLine l = (ChatLine) o;
-			renderEmotesForLine(l, chat, chatLines, isOpen, ev);
+			ChatLine l2 = (ChatLine) chatLines2.get(i);
+			renderEmotesForLine(l, l2, chat, chatLines, chatLines2, isOpen, ev);
+			i++;
 		}
 
 		GL11.glScaled(1 / Minecraft.getMinecraft().gameSettings.chatScale,
@@ -65,14 +69,15 @@ public class RenderHandler {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private void renderEmotesForLine(ChatLine l, GuiNewChat chat, List chatLines, boolean isOpen,
-			RenderGameOverlayEvent ev) {
+	private void renderEmotesForLine(ChatLine l, ChatLine l2, GuiNewChat chat, List chatLines,
+			List chatLines2, boolean isOpen, RenderGameOverlayEvent ev) {
 
 		// Make it an emote line :D
-		if (!(l.func_151461_a() instanceof ChatComponentEmote))
-			ReflectionUtils.set(l, "lineString", new ChatComponentEmote(l.func_151461_a()));
+		if (!(l2.func_151461_a() instanceof ChatComponentEmote)) {
+			ReflectionUtils.set(l2, "lineString", new ChatComponentEmote(l2.func_151461_a()));
+		}
 
-		ChatComponentEmote cc = (ChatComponentEmote) l.func_151461_a();
+		IChatComponent cc = l.func_151461_a();
 
 		FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
 		int id = chatLines.indexOf(l);
@@ -109,38 +114,48 @@ public class RenderHandler {
 			i2 = ((float) i2 * opacity);
 
 			if (i2 > 3) {
-				String unformatted = cc.getOriginalText().trim();
+				String unformatted = cc.getUnformattedText().trim();
 				String s = unformatted;
 				int index = 0;
+				int lastIndex = 0;
+
+				int translation = 0;
 
 				boolean found = false;
 				do {
 					found = false;
-					String emote = "";
-					for (String e : TheBestIRCModEver.emotes) {
-						if (s.contains(" " + e + " ") || s.startsWith(e + " ")
-								|| (s.startsWith(e) && s.length() == e.length())
+					Emote emote = null;
+					for (Emote e : TheBestIRCModEver.emotes) {
+						if (s.contains(" " + e + " ")
+								|| s.startsWith(e + " ")
+								|| (s.startsWith(e.getEmote()) && s.length() == e.getEmote()
+										.length())
 								|| s.endsWith(" " + e)
-								|| (s.endsWith(e) && s.length() == e.length())) {
+								|| (s.endsWith(e.getEmote()) && s.length() == e.getEmote().length())) {
+							if (!e.hasFile()) {
+								e.download();
+								continue;
+							}
 							emote = e;
 							found = true;
-							index += s.indexOf(e) + e.length();
-							s = s.substring(s.indexOf(e) + e.length());
+							lastIndex = index;
+							index += s.indexOf(e.getEmote());
+							s = s.substring(s.indexOf(e.getEmote()) + e.getEmote().length());
 							break;
 						}
 					}
 
 					if (found) {
-						String before = unformatted.substring(0, index - emote.length() - 1);
-						int w = fr.getStringWidth(before);
-						renderEmote(w, id, emote, opacity, ev);
+						String before = unformatted.substring(lastIndex, index);
+						translation += fr.getStringWidth(before) + 7;
+						renderEmote(translation - 11, id, emote, opacity, ev);
 					}
 				} while (found);
 			}
 		}
 	}
 
-	public void renderEmote(double x, int line, String emote, double opacity,
+	public void renderEmote(double x, int line, Emote emote, double opacity,
 			RenderGameOverlayEvent ev) {
 		GL11.glEnable(GL11.GL_BLEND);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -148,8 +163,7 @@ public class RenderHandler {
 		int emoteSize = 28;
 		GL11.glPushMatrix();
 		{
-			Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ModInfo.MODID
-					+ ":emotes/" + emote.toLowerCase() + ".png"));
+			Minecraft.getMinecraft().renderEngine.bindTexture(emote.getResource());
 			GL11.glColor4d(1, 1, 1, opacity);
 			GL11.glTranslated(x + 3, ev.resolution.getScaledHeight_double() - (9 * line) - 32
 					- (emoteSize / 4D), 0);

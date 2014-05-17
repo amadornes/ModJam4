@@ -3,8 +3,6 @@ package com.amadornes.tbircme.util;
 import java.util.Iterator;
 import java.util.List;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.util.ChatComponentStyle;
 import net.minecraft.util.ChatStyle;
 import net.minecraft.util.IChatComponent;
@@ -21,15 +19,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 public class ChatComponentEmote implements IChatComponent {
 
 	private static String getTextForWidth(int width) {
-		String s = "";
-		int w = 0;
-
-		FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
-
-		while (w < width) {
-			s += "i";
-			w = fr.getStringWidth(s);
-		}
+		String s = "   ";
 
 		return s;
 	}
@@ -43,12 +33,12 @@ public class ChatComponentEmote implements IChatComponent {
 	@Override
 	public String getUnformattedTextForChat() {
 		String s = comp.getUnformattedTextForChat();
-		for (String e : TheBestIRCModEver.emotes) {
-			s.replace(" " + e + " ", getTextForWidth(14) + "  ");
-			if (s.startsWith(e))
-				s.replaceFirst(e, getTextForWidth(14));
-			if (s.endsWith(e))
-				s = s.substring(0, s.length() - e.length() - 1);
+		for (Emote e : TheBestIRCModEver.emotes) {
+			s.replace(" " + e.getEmote() + " ", getTextForWidth(14) + "  ");
+			if (s.startsWith(e.getEmote()))
+				s.replaceFirst(e.getEmote(), getTextForWidth(14));
+			if (s.endsWith(e.getEmote()))
+				s = s.substring(0, s.length() - e.getEmote().length() - 1);
 		}
 		
 		System.out.println(s);
@@ -91,12 +81,12 @@ public class ChatComponentEmote implements IChatComponent {
 	public final String getUnformattedText() {
 
 		String s = comp.getUnformattedText();
-		for (String e : TheBestIRCModEver.emotes) {
+		for (Emote e : TheBestIRCModEver.emotes) {
 			s.replace(" " + e + " ", getTextForWidth(14) + "  ");
-			if (s.startsWith(e))
-				s.replaceFirst(e, getTextForWidth(14));
-			if (s.endsWith(e))
-				s = s.substring(0, s.length() - e.length() - 1);
+			if (s.startsWith(e.getEmote()))
+				s.replaceFirst(e.getEmote(), getTextForWidth(14));
+			if (s.endsWith(e.getEmote()))
+				s = s.substring(0, s.length() - e.getEmote().length() - 1);
 		}
 
 		return s;
@@ -105,12 +95,17 @@ public class ChatComponentEmote implements IChatComponent {
 	@SideOnly(Side.CLIENT)
 	public final String getFormattedText() {
 		String s = comp.getFormattedText();
-		for (String e : TheBestIRCModEver.emotes) {
-			s.replace(" " + e + " ", getTextForWidth(14) + "  ");
-			if (s.startsWith(e))
-				s.replaceFirst(e, getTextForWidth(14));
-			if (s.endsWith(e))
-				s = s.substring(0, s.length() - e.length() - 1);
+		for (Emote e : TheBestIRCModEver.emotes) {
+			s = s.replace(" " + e.getEmote() + " ", getTextForWidth(14) + " ");
+			s = s.replace("\u00A7r" + e.getEmote() + " ", getTextForWidth(14));
+			s = s.replace(" " + e.getEmote() + "\u00A7r ", getTextForWidth(14) + " ");
+			s = s.replace(" " + e.getEmote() + "\u00A7r", getTextForWidth(14));
+			s = s.replace("\u00A7r" + e.getEmote() + "\u00A7r ", getTextForWidth(14));
+			s = s.replace("\u00A7r" + e.getEmote() + "\u00A7r", getTextForWidth(14));
+			if (s.startsWith(e.getEmote()))
+				s.replaceFirst(e.getEmote(), getTextForWidth(14));
+			if (s.endsWith(e.getEmote()))
+				s = s.substring(0, s.length() - e.getEmote().length() - 1);
 		}
 
 		return s;
@@ -161,7 +156,7 @@ public class ChatComponentEmote implements IChatComponent {
 	}
 
 	public String toString() {
-		return "EmoteComponent{style=" + this.style + ", siblings=" + this.siblings + '}';
+		return "EmoteComponent" + comp.toString().substring(comp.toString().indexOf("{"));
 	}
 
 	public String getChatComponentText_TextValue() {
