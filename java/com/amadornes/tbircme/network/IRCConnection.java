@@ -85,6 +85,9 @@ public class IRCConnection {
 						received = true;
 					}
 				}
+				
+				if(password != null)
+					sendRaw("PASS " + password, true, false);
 
 				boolean tryAgain = false;
 				int id = 0;

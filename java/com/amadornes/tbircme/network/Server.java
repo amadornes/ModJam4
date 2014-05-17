@@ -4,13 +4,14 @@ import java.util.List;
 
 public class Server {
 
-	private String host, username;
+	private String host, serverpass, username;
 	private List<String> channels, commands;
 	
 	private IRCConnection irc;
 
-	public Server(String host, String username, List<String> channels, List<String> commands) {
+	public Server(String host, String serverpass, String username, List<String> channels, List<String> commands) {
 		this.host = host;
+		this.serverpass = serverpass;
 		this.username = username;
 		this.commands = commands;
 		this.channels = channels;
@@ -38,7 +39,7 @@ public class Server {
 
 			@Override
 			public void run() {
-				final IRCConnection irc = new IRCConnection(host, username);
+				final IRCConnection irc = new IRCConnection(host, username, serverpass);
 				me.irc = irc;
 				irc.connect();
 				irc.waitUntilConnected();
