@@ -15,6 +15,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.amadornes.tbircme.ModInfo;
 import com.amadornes.tbircme.TheBestIRCModEver;
+import com.amadornes.tbircme.util.ChatComponentEmote;
 import com.amadornes.tbircme.util.ReflectionUtils;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -66,6 +67,13 @@ public class RenderHandler {
 	@SuppressWarnings("rawtypes")
 	private void renderEmotesForLine(ChatLine l, GuiNewChat chat, List chatLines, boolean isOpen,
 			RenderGameOverlayEvent ev) {
+
+		// Make it an emote line :D
+		if (!(l.func_151461_a() instanceof ChatComponentEmote))
+			ReflectionUtils.set(l, "lineString", new ChatComponentEmote(l.func_151461_a()));
+
+		ChatComponentEmote cc = (ChatComponentEmote) l.func_151461_a();
+
 		FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
 		int id = chatLines.indexOf(l);
 		int id2 = (id - ((int) ReflectionUtils.get(chat, "field_146250_j")));
@@ -101,7 +109,7 @@ public class RenderHandler {
 			i2 = ((float) i2 * opacity);
 
 			if (i2 > 3) {
-				String unformatted = l.func_151461_a().getUnformattedTextForChat().trim();
+				String unformatted = cc.getOriginalText().trim();
 				String s = unformatted;
 				int index = 0;
 
@@ -123,9 +131,8 @@ public class RenderHandler {
 					}
 
 					if (found) {
-						String before = s.length() == 0 ? unformatted.substring(0, unformatted.length() - emote.length() - 1) : unformatted.substring(0, index);
+						String before = unformatted.substring(0, index - emote.length() - 1);
 						int w = fr.getStringWidth(before);
-						System.out.println("\"" + before + "\" -> " + w);
 						renderEmote(w, id, emote, opacity, ev);
 					}
 				} while (found);
@@ -142,9 +149,10 @@ public class RenderHandler {
 		GL11.glPushMatrix();
 		{
 			Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ModInfo.MODID
-					+ ":emotes/kappa.png"));
+					+ ":emotes/" + emote.toLowerCase() + ".png"));
 			GL11.glColor4d(1, 1, 1, opacity);
-			GL11.glTranslated(x + 3, ev.resolution.getScaledHeight_double() - (9 * line) - 32 - 7, 0);
+			GL11.glTranslated(x + 3, ev.resolution.getScaledHeight_double() - (9 * line) - 32
+					- (emoteSize / 4D), 0);
 			GL11.glScaled(0.5, 0.5, 1);
 			drawTexturedModalRect(0, 0, 0, 0, emoteSize, emoteSize);
 			GL11.glScaled(2, 2, 1);

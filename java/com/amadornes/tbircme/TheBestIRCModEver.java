@@ -48,7 +48,7 @@ public class TheBestIRCModEver {
 	public static boolean canChangeServerConfig = false;
 
 	public static List<String> emotes = new ArrayList<String>(
-			Arrays.asList(new String[] { "Kappa" }));
+			Arrays.asList(new String[] { "Kappa", "Keepo" }));
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent ev) {
