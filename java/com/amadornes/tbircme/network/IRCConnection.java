@@ -76,19 +76,19 @@ public class IRCConnection {
 
 				r = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				w = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+				
+				if(password != null && password.trim().length() != 0){
+					sendRaw("PASS " + password);
+				}
 
 				// Clear incoming messages
 				{
 					boolean received = false;
 					String line = "";
 					while ((line = r.readLine()) != null && (r.ready() || !received)) {
-						System.out.println("RECEIVED!!!! " + line);
+						line = (String) line;
 						received = true;
 					}
-				}
-				
-				if(password != null && password.trim().length() != 0){
-					sendRaw("PASS " + password);
 				}
 
 				boolean tryAgain = false;
