@@ -145,4 +145,7 @@ public class CommonProxy {
 			s.disconnect();
 	}
 
+	public void registerRenders() {
+	}
+
 }

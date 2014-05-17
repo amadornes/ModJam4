@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 
-import com.amadornes.tbircme.command.CommandTBIRCME;
 import com.amadornes.tbircme.gui.GuiHandler;
 import com.amadornes.tbircme.network.IRCConnection;
 import com.amadornes.tbircme.packet.PacketHandler;
@@ -60,11 +59,14 @@ public class TheBestIRCModEver {
 		com.amadornes.tbircme.handler.EventHandler handler = new com.amadornes.tbircme.handler.EventHandler();
 		MinecraftForge.EVENT_BUS.register(handler);
 		FMLCommonHandler.instance().bus().register(handler);
+		
+		proxy.registerRenders();
 	}
 
 	@EventHandler
 	public void onServerStart(FMLServerStartingEvent ev) {
-		ev.registerServerCommand(new CommandTBIRCME());
+		// TODO Re-enable command commandev.registerServerCommand(new
+		// CommandTBIRCME());
 	}
 
 	@EventHandler

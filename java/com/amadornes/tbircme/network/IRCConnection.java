@@ -312,12 +312,20 @@ public class IRCConnection {
 			if (s.indexOf(" JOIN ") == s.indexOf(" ")) {
 				u.setOnline(true);
 				if (server.shouldShowIRCJoins())
-					broadcast("* " + who + " has joined the channel.");
+					for (Object o : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
+						EntityPlayer p = (EntityPlayer) o;
+						p.addChatMessage(new ChatComponentText("* " + who
+								+ " has entered the channel."));
+					}
 			}
 			if (s.indexOf(" PART ") == s.indexOf(" ")) {
 				u.setOnline(false);
 				if (server.shouldShowIRCParts())
-					broadcast("* " + who + " has left the channel (" + ").");
+					for (Object o : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
+						EntityPlayer p = (EntityPlayer) o;
+						p.addChatMessage(new ChatComponentText("* " + who
+								+ " has left the channel."));
+					}
 			}
 
 			return;
