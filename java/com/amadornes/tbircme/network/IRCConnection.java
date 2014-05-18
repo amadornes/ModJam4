@@ -129,6 +129,9 @@ public class IRCConnection {
 	}
 
 	public void ragequit() {
+		if (!isConnected())
+			return;
+
 		sendRaw("QUIT");
 		try {
 			socket.close();
@@ -149,6 +152,8 @@ public class IRCConnection {
 	}
 
 	public void sendRaw(String str, boolean carriageReturn, boolean flush) {
+		if (!isConnected())
+			return;
 		try {
 			String s = str + (carriageReturn ? "\r\n" : "");
 			w.write(s);

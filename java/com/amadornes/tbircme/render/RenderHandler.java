@@ -23,6 +23,7 @@ import com.amadornes.tbircme.emote.EmoteWrapper;
 import com.amadornes.tbircme.util.ChatComponentEmote;
 import com.amadornes.tbircme.util.Config;
 import com.amadornes.tbircme.util.ReflectionUtils;
+import com.amadornes.tbircme.util.Util;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
@@ -33,7 +34,6 @@ public class RenderHandler {
 	@SuppressWarnings("rawtypes")
 	@SubscribeEvent
 	public void onRenderOverlayTick(RenderGameOverlayEvent ev) {
-
 		if (ev.type != ElementType.CHAT)
 			return;
 
@@ -41,8 +41,8 @@ public class RenderHandler {
 			return;
 
 		tip = null;
-		
-		if(!Config.emotesEnabled)
+
+		if (!Config.emotesEnabled)
 			return;
 
 		GL11.glPushMatrix();
@@ -58,18 +58,22 @@ public class RenderHandler {
 		GL11.glTexParameterf(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
 
 		GuiNewChat chat = Minecraft.getMinecraft().ingameGUI.getChatGUI();
-		List chatLines = (List) ReflectionUtils.get(chat, "chatLines");
+		List chatLines = (List) ReflectionUtils.get(chat, Util.isDeobfuscated() ? "chatLines"
+				: "field_146252_h");
 		List chatLines2 = (List) ReflectionUtils.get(chat, "field_146253_i");
 		boolean isOpen = chat.getChatOpen();
 
 		if (chatLines == null)
 			return;
-		
+
 		int i = 0;
 		for (Object o : chatLines) {
 			ChatLine l = (ChatLine) o;
 			ChatLine l2 = (ChatLine) chatLines2.get(i);
-			renderEmotesForLine(l, l2, chat, chatLines, chatLines2, isOpen, ev);
+			try {
+				renderEmotesForLine(l, l2, chat, chatLines, chatLines2, isOpen, ev);
+			} catch (Exception ex) {
+			}
 			i++;
 		}
 
@@ -77,18 +81,19 @@ public class RenderHandler {
 		{
 			GL11.glEnable(GL11.GL_LIGHTING);
 			if (isOpen && tip != null)
-				RenderHelper.drawHoveringText(tip, ev.mouseX, ev.mouseY, Minecraft.getMinecraft().fontRenderer);
+				RenderHelper.drawHoveringText(tip, ev.mouseX, ev.mouseY,
+						Minecraft.getMinecraft().fontRenderer);
 			GL11.glDisable(GL11.GL_LIGHTING);
 		}
 		GL11.glPopMatrix();
 
+		GL11.glDisable(GL11.GL_LINE_SMOOTH);
+		GL11.glDisable(GL11.GL_POLYGON_SMOOTH);
+		GL11.glDisable(GL11.GL_POINT_SMOOTH);
 		GL11.glScaled(1 / Minecraft.getMinecraft().gameSettings.chatScale,
 				1 / Minecraft.getMinecraft().gameSettings.chatScale, 1);
 		if (lighting)
 			GL11.glEnable(GL11.GL_LIGHTING);
-		GL11.glDisable(GL11.GL_LINE_SMOOTH);
-		GL11.glDisable(GL11.GL_POLYGON_SMOOTH);
-		GL11.glDisable(GL11.GL_POINT_SMOOTH);
 
 		GL11.glPopMatrix();
 	}
@@ -97,22 +102,25 @@ public class RenderHandler {
 	private void renderEmotesForLine(ChatLine l, ChatLine l2, GuiNewChat chat, List chatLines,
 			List chatLines2, boolean isOpen, RenderGameOverlayEvent ev) {
 
-		
 		// Make it an emote line :D
 		if (!(l.func_151461_a() instanceof ChatComponentEmote)
 				|| !(l2.func_151461_a() instanceof ChatComponentEmote)) {
-			ReflectionUtils.set(l, "lineString", new ChatComponentEmote(l.func_151461_a()));
-			ReflectionUtils.set(l2, "lineString", new ChatComponentEmote(l2.func_151461_a()));
+			ReflectionUtils.set(l, Util.isDeobfuscated() ? "lineString" : "field_74541_b",
+					new ChatComponentEmote(l.func_151461_a()));
+			ReflectionUtils.set(l2, Util.isDeobfuscated() ? "lineString" : "field_74541_b",
+					new ChatComponentEmote(l2.func_151461_a()));
 		}
 
 		ChatComponentEmote cc = (ChatComponentEmote) l.func_151461_a();
 
 		FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
 		int id = 0;
-		for(ChatLine l3 : ((List<ChatLine>)chatLines)){
-			if(l3 == l)
+		for (ChatLine l3 : ((List<ChatLine>) chatLines)) {
+			if (l3 == l)
 				break;
-			id += fr.listFormattedStringToWidth(((ChatComponentEmote)l3.func_151461_a()).getOriginalText(), (int)(Minecraft.getMinecraft().gameSettings.chatWidth * 320)).size();
+			id += fr.listFormattedStringToWidth(
+					((ChatComponentEmote) l3.func_151461_a()).getOriginalText(),
+					(int) (Minecraft.getMinecraft().gameSettings.chatWidth * 320)).size();
 		}
 		int id2 = (id - ((Integer) ReflectionUtils.get(chat, "field_146250_j")));
 		if ((id2 + 1) * 9 > (isOpen ? Minecraft.getMinecraft().gameSettings.chatHeightFocused
@@ -151,8 +159,9 @@ public class RenderHandler {
 				if (emoteL == null) {
 					emoteL = new ArrayList<EmoteWrapper>();
 					cc.setEmotes(emoteL);
-					List lines = fr.listFormattedStringToWidth(cc.getOriginalText().trim(), (int)(Minecraft.getMinecraft().gameSettings.chatWidth * 320));
-					for(int i4 = 0; i4 < lines.size(); i4++){
+					List lines = fr.listFormattedStringToWidth(cc.getOriginalText().trim(),
+							(int) (Minecraft.getMinecraft().gameSettings.chatWidth * 320));
+					for (int i4 = 0; i4 < lines.size(); i4++) {
 						String unformatted = (String) lines.get(i4);
 						String s = unformatted;
 						int index = 0;
@@ -168,8 +177,8 @@ public class RenderHandler {
 							for (Emote e : TheBestIRCModEver.emotes) {
 								if (s.contains(" " + e.getEmote() + " ")
 										|| s.startsWith(e.getEmote() + " ")
-										|| (s.startsWith(e.getEmote()) && s.length() == e.getEmote()
-												.length())
+										|| (s.startsWith(e.getEmote()) && s.length() == e
+												.getEmote().length())
 										|| s.endsWith(" " + e.getEmote())
 										|| (s.endsWith(e.getEmote()) && s.length() == e.getEmote()
 												.length())) {
@@ -190,19 +199,24 @@ public class RenderHandler {
 							if (found) {
 								lastIndex = index;
 								index += s.indexOf(emote.getEmote());
-								s = s.substring(s.indexOf(emote.getEmote()) + emote.getEmote().length());
+								s = s.substring(s.indexOf(emote.getEmote())
+										+ emote.getEmote().length());
 							}
 
 							if (found) {
 								String before = unformatted.substring(lastIndex, index);
 								translation += fr.getStringWidth(before) + 7;
-								emoteL.add(new EmoteWrapper(emote, lines.size() - i4 - 1, translation - 11));
+								emoteL.add(new EmoteWrapper(emote, lines.size() - i4 - 1,
+										translation - 11));
 							}
 						} while (found);
 					}
 				} else {
 					for (EmoteWrapper w : emoteL) {
-						renderEmote(w.getX(), id + w.getLine(), w.getEmote(), opacity, ev);
+						try {
+							renderEmote(w.getX(), id + w.getLine(), w.getEmote(), opacity, ev);
+						} catch (Exception ex) {
+						}
 					}
 				}
 			}
