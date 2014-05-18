@@ -53,8 +53,6 @@ public class User {
 	}
 
 	public boolean canRunCommand(String command) {
-
-		System.out.println(username + " " + isOp() + " " + isVoice());
 		
 		if (isOp())
 			return true;

@@ -49,7 +49,7 @@ public class CommandTBIRCME extends CommandBase {
 	public List addTabCompletionOptions(ICommandSender cmd, String[] args) {
 		List<String> options = new ArrayList<String>();
 
-		if (args.length == 0) {
+		if (args.length == 1) {
 			options.add("cfg");
 			options.add("svcfg");
 		}

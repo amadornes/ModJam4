@@ -88,9 +88,6 @@ public class IRCConnection {
 
 				if (password != null && password.trim().length() != 0) {
 					sendRaw("PASS " + password);
-					System.out.println("USING PASSWORD!!!!!");
-				} else {
-					System.out.println("NOT USING PASSWORD!!!!!");
 				}
 
 				// Clear incoming messages
@@ -352,8 +349,6 @@ public class IRCConnection {
 				String username = us.substring(Math.max(0,
 						Math.max(us.indexOf("@") + 1, us.indexOf("+") + 1)));
 				User u = new User(channel, username, true, op, voice);
-
-				System.out.println(us + " -> " + username + " " + op + " " + voice);
 
 				channel.addUser(u);
 			}

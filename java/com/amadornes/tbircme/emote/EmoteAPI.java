@@ -1,4 +1,4 @@
-package com.amadornes.tbircme.util;
+package com.amadornes.tbircme.emote;
 
 import java.util.Map.Entry;
 

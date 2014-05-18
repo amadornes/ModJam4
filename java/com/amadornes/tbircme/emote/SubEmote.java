@@ -1,4 +1,4 @@
-package com.amadornes.tbircme.util;
+package com.amadornes.tbircme.emote;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +20,8 @@ public class SubEmote extends Emote {
 	public List<String> getToolTip() {
 		if(tooltip == null){
 			tooltip = new ArrayList<String>();
-			tooltip.add(getEmote());
-			tooltip.add(getChannel());
+			tooltip.add("Emote: " + getEmote());
+			tooltip.add("Channel: " + getChannel());
 		}
 		
 		return tooltip;

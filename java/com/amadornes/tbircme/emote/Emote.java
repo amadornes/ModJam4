@@ -1,4 +1,4 @@
-package com.amadornes.tbircme.util;
+package com.amadornes.tbircme.emote;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -79,7 +79,7 @@ public class Emote {
 	public List<String> getToolTip(){
 		if(tooltip == null){
 			tooltip = new ArrayList<String>();
-			tooltip.add(getEmote());
+			tooltip.add("Emote: " + getEmote());
 		}
 		
 		return tooltip;

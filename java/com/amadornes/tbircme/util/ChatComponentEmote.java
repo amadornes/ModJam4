@@ -8,6 +8,8 @@ import net.minecraft.util.ChatStyle;
 import net.minecraft.util.IChatComponent;
 
 import com.amadornes.tbircme.TheBestIRCModEver;
+import com.amadornes.tbircme.emote.Emote;
+import com.amadornes.tbircme.emote.EmoteWrapper;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -25,6 +27,7 @@ public class ChatComponentEmote implements IChatComponent {
 	}
 
 	private IChatComponent comp;
+	private List<EmoteWrapper> emotes;
 
 	public ChatComponentEmote(IChatComponent comp) {
 		this.comp = comp;
@@ -35,6 +38,7 @@ public class ChatComponentEmote implements IChatComponent {
 
 	@Override
 	public String getUnformattedTextForChat() {
+
 		String str = comp.getUnformattedTextForChat();
 		if (unformattedForChat == null || !unformattedForChatOriginal.equals(str)) {
 			unformattedForChatOriginal = str;
@@ -49,6 +53,8 @@ public class ChatComponentEmote implements IChatComponent {
 
 			unformattedForChat = s;
 		}
+		if (!Config.emotesEnabled)
+			return unformattedForChatOriginal;
 
 		return unformattedForChat;
 	}
@@ -105,6 +111,8 @@ public class ChatComponentEmote implements IChatComponent {
 
 			unformatted = s;
 		}
+		if (!Config.emotesEnabled)
+			return unformattedOriginal;
 
 		return unformatted;
 	}
@@ -134,6 +142,10 @@ public class ChatComponentEmote implements IChatComponent {
 
 			formatted = s;
 		}
+
+		if (!Config.emotesEnabled)
+			return formattedOriginal;
+
 		return formatted;
 	}
 
@@ -191,6 +203,14 @@ public class ChatComponentEmote implements IChatComponent {
 
 	public ChatComponentEmote createCopy() {
 		return new ChatComponentEmote(comp);
+	}
+
+	public List<EmoteWrapper> getEmotes() {
+		return emotes;
+	}
+
+	public void setEmotes(List<EmoteWrapper> emotes) {
+		this.emotes = emotes;
 	}
 
 }

@@ -9,11 +9,12 @@ import java.util.logging.Logger;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 
+import com.amadornes.tbircme.command.CommandTBIRCME;
+import com.amadornes.tbircme.emote.Emote;
+import com.amadornes.tbircme.emote.EmoteAPI;
 import com.amadornes.tbircme.network.IRCConnection;
 import com.amadornes.tbircme.packet.PacketHandler;
 import com.amadornes.tbircme.proxy.CommonProxy;
-import com.amadornes.tbircme.util.Emote;
-import com.amadornes.tbircme.util.EmoteAPI;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
@@ -71,7 +72,7 @@ public class TheBestIRCModEver {
 
 	@EventHandler
 	public void onServerStart(FMLServerStartingEvent ev) {
-
+		ev.registerServerCommand(new CommandTBIRCME());
 	}
 
 	@EventHandler
