@@ -51,10 +51,12 @@ public class GuiTextFieldCustomizable extends Gui {
 	private int enabledColor = 14737632;
 	private int disabledColor = 7368816;
 	private int placeholderColor = 0x5C5C5C;
+	private int placeholderDisabledColor = 0x2E2E2E;
 	/** True if this textbox is visible */
 	private boolean visible = true;
 
 	private String placeholder = "";
+	private boolean password = false;
 
 	public GuiTextFieldCustomizable(FontRenderer par1FontRenderer, int par2, int par3, int par4,
 			int par5) {
@@ -70,10 +72,14 @@ public class GuiTextFieldCustomizable extends Gui {
 	}
 
 	public void setText(String p_146180_1_) {
-		if (p_146180_1_.length() > this.maxStringLength) {
-			this.text = p_146180_1_.substring(0, this.maxStringLength);
+		if (p_146180_1_ == null) {
+			this.text = "";
 		} else {
-			this.text = p_146180_1_;
+			if (p_146180_1_.length() > this.maxStringLength) {
+				this.text = p_146180_1_.substring(0, this.maxStringLength);
+			} else {
+				this.text = p_146180_1_;
+			}
 		}
 
 		this.setCursorPositionEnd();
@@ -97,6 +103,14 @@ public class GuiTextFieldCustomizable extends Gui {
 
 	public String getTooltip() {
 		return tooltip;
+	}
+
+	public void setPassword(boolean password) {
+		this.password = password;
+	}
+
+	public boolean isPassword() {
+		return password;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -417,10 +431,17 @@ public class GuiTextFieldCustomizable extends Gui {
 			}
 
 			String s = this.field_146211_a.trimStringToWidth(
-					this.text.substring(this.lineScrollOffset), this.getWidth());
+					this.getPasswordCharsFor(text).substring(this.lineScrollOffset), this.getWidth());
 			this.setCursorPosition(this.field_146211_a.trimStringToWidth(s, l).length()
 					+ this.lineScrollOffset);
 		}
+	}
+
+	private String getPasswordCharsFor(String str) {
+		String s = "";
+		for (int i = 0; i < str.length(); i++)
+			s += "*";
+		return s;
 	}
 
 	/**
@@ -437,11 +458,18 @@ public class GuiTextFieldCustomizable extends Gui {
 
 			int i = this.isEnabled ? this.enabledColor : this.disabledColor;
 			if (this.text == null || this.text.trim().length() == 0)
-				i = this.placeholderColor;
+				i = this.isEnabled ? this.placeholderColor : this.placeholderDisabledColor;
 			int j = this.cursorPosition - this.lineScrollOffset;
 			int k = this.selectionEnd - this.lineScrollOffset;
-			String s = this.field_146211_a.trimStringToWidth(
-					this.text.substring(this.lineScrollOffset), this.getWidth());
+			String s;
+			if (isPassword()) {
+				s = this.field_146211_a.trimStringToWidth(
+						getPasswordCharsFor(this.text).substring(this.lineScrollOffset),
+						this.getWidth());
+			} else {
+				s = this.field_146211_a.trimStringToWidth(
+						this.text.substring(this.lineScrollOffset), this.getWidth());
+			}
 			if (this.text == null || this.text.trim().length() == 0)
 				s = this.field_146211_a.trimStringToWidth(
 						this.placeholder.substring(this.lineScrollOffset), this.getWidth());
@@ -604,6 +632,10 @@ public class GuiTextFieldCustomizable extends Gui {
 
 	public void setEnabled(boolean p_146184_1_) {
 		this.isEnabled = p_146184_1_;
+	}
+	
+	public boolean isEnabled() {
+		return isEnabled;
 	}
 
 	/**

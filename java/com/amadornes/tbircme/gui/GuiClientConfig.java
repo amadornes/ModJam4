@@ -56,7 +56,7 @@ public class GuiClientConfig extends GuiScreen {
 		int btnHeight = 20;
 		int btnWidth = 150;
 		int vert = 3;
-		int hor = 2;
+		int hor = 1;
 		int max = 6;
 
 		for (int x = 0; x < hor; x++) {

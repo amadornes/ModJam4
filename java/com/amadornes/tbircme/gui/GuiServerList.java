@@ -1,6 +1,8 @@
 package com.amadornes.tbircme.gui;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Random;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -9,9 +11,11 @@ import net.minecraft.client.gui.GuiLabel;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import com.amadornes.tbircme.ModInfo;
+import com.amadornes.tbircme.TheBestIRCModEver;
 import com.amadornes.tbircme.network.Server;
 import com.amadornes.tbircme.util.Config;
 
@@ -26,10 +30,12 @@ public class GuiServerList extends GuiScreen {
 	private GuiButton btnDelServer;
 	private GuiButton btnDone;
 
-	private GuiTextFieldCustomizable fName, fHost, fUsername, fPassword;
+	private GuiButton btnSave;
+	private GuiButton btnCancel;
+	
+	private GuiCheckbox cbDeath, cbGameJoin, cbGameLeave, cbIRCJoin, cbIRCLeave;
 
-	// private List<GuiTextFieldCustomizable> fields = new
-	// ArrayList<GuiTextFieldCustomizable>();
+	private GuiTextFieldCustomizable fName, fHost, fUsername, fPassword;
 
 	public GuiServerList(GuiScreen previousGui) {
 		this.previousGui = previousGui;
@@ -44,6 +50,8 @@ public class GuiServerList extends GuiScreen {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
+		Keyboard.enableRepeatEvents(true);
+
 		for (Server server : servers) {
 			listWidth = Math
 					.max(listWidth, getFontRenderer().getStringWidth(server.getName()) + 10);
@@ -70,16 +78,19 @@ public class GuiServerList extends GuiScreen {
 		fName = (new GuiTextFieldCustomizable(fontRendererObj, 10 + listWidth + 10, 32, 200, 20));
 		fName.setPlaceholder(I18n.format(ModInfo.MODID + ".config.servers.placeholder.name",
 				new Object[0]));
+		fName.setEnabled(false);
 
 		fHost = (new GuiTextFieldCustomizable(fontRendererObj, 10 + listWidth + 10, 32 + 20 + 5,
 				200, 20));
 		fHost.setPlaceholder(I18n.format(ModInfo.MODID + ".config.servers.placeholder.host",
 				new Object[0]));
+		fName.setEnabled(false);
 
 		fUsername = (new GuiTextFieldCustomizable(fontRendererObj, 10 + listWidth + 10, 32 + 20 + 5
 				+ 20 + 5, 200, 20));
 		fUsername.setPlaceholder(I18n.format(
 				ModInfo.MODID + ".config.servers.placeholder.username", new Object[0]));
+		fUsername.setEnabled(false);
 
 		fPassword = (new GuiTextFieldCustomizable(fontRendererObj, 10 + listWidth + 10, 32 + 20 + 5
 				+ 20 + 5 + 20 + 5, 200, 20));
@@ -87,7 +98,14 @@ public class GuiServerList extends GuiScreen {
 				ModInfo.MODID + ".config.servers.placeholder.password", new Object[0]));
 		fPassword.setTooltip(I18n.format(ModInfo.MODID
 				+ ".config.servers.placeholder.password.tooltip", new Object[0]));
+		fPassword.setPassword(true);
+		fPassword.setEnabled(false);
+		
+		cbGameJoin = new GuiCheckbox(10 + listWidth + 10, 32 + 20 + 5
+				+ 20 + 5 + 20 + 5 + 20 + 5, 8);
 	}
+
+	private static Random rnd = new Random();
 
 	@Override
 	protected void actionPerformed(GuiButton button) {
@@ -98,6 +116,17 @@ public class GuiServerList extends GuiScreen {
 			}
 			if (button == btnDelServer) {
 				this.mc.displayGuiScreen(new GuiConfirmationDeleteServer(this));
+			}
+			if (button == btnAddServer) {
+				File f = null;
+				do {
+					f = new File(TheBestIRCModEver.proxy.configFolder, rnd.nextInt(134132) + ".cfg");
+				} while (f.exists());
+				servers.add(new Server(I18n.format(ModInfo.MODID
+						+ ".config.servers.placeholder.name", new Object[0]), "", "", "",
+						new ArrayList<String>(), new ArrayList<String>(), true, true, true, true,
+						true, f));
+				selectServerIndex(servers.size() - 1);
 			}
 		}
 		super.actionPerformed(button);
@@ -134,15 +163,33 @@ public class GuiServerList extends GuiScreen {
 			((GuiLabel) this.labelList.get(k)).func_146159_a(this.mc, p_571_1_, p_571_2_);
 		}
 
+		if (selectedServer != null) {
+			fName.setEnabled(true);
+			fHost.setEnabled(true);
+			fUsername.setEnabled(true);
+			fPassword.setEnabled(true);
+			cbGameJoin.setEnabled(true);
+		} else {
+			fName.setEnabled(false);
+			fHost.setEnabled(false);
+			fUsername.setEnabled(false);
+			fPassword.setEnabled(false);
+			cbGameJoin.setEnabled(false);
+		}
+
 		fName.drawTextBox();
 		fHost.drawTextBox();
 		fUsername.drawTextBox();
 		fPassword.drawTextBox();
+		
+		cbGameJoin.drawCheckbox();
 
 		fName.renderTooltip(p_571_1_, p_571_2_);
 		fHost.renderTooltip(p_571_1_, p_571_2_);
 		fUsername.renderTooltip(p_571_1_, p_571_2_);
 		fPassword.renderTooltip(p_571_1_, p_571_2_);
+		
+		cbGameJoin.renderTooltip(p_571_1_, p_571_2_);
 	}
 
 	public void confirmClicked(boolean par1, int par2) {
@@ -150,7 +197,8 @@ public class GuiServerList extends GuiScreen {
 		if (par2 == 0) {
 			if (par1) {
 				Config.servers.remove(selectedServer);
-				selectedServer.getConnection().disconnect();
+				if (selectedServer.isConnected())
+					selectedServer.getConnection().disconnect();
 				if (selectedServer.getConfigFile().exists())
 					selectedServer.getConfigFile().delete();
 				Minecraft.getMinecraft().displayGuiScreen(this);
@@ -171,6 +219,10 @@ public class GuiServerList extends GuiScreen {
 		if (var1 >= 0 && var1 <= servers.size()) {
 			this.selectedServer = servers.get(selected);
 
+			fName.setText(selectedServer.getName());
+			fHost.setText(selectedServer.getHost());
+			fUsername.setText(selectedServer.getUsername());
+			fPassword.setText(selectedServer.getServerpass());
 		} else {
 			this.selectedServer = null;
 		}
@@ -184,20 +236,28 @@ public class GuiServerList extends GuiScreen {
 	protected void mouseClicked(int par1, int par2, int par3) {
 		super.mouseClicked(par1, par2, par3);
 
-		fName.mouseClicked(par1, par2, par3);
-		fHost.mouseClicked(par1, par2, par3);
-		fUsername.mouseClicked(par1, par2, par3);
-		fPassword.mouseClicked(par1, par2, par3);
+		if (fName.isEnabled())
+			fName.mouseClicked(par1, par2, par3);
+		if (fHost.isEnabled())
+			fHost.mouseClicked(par1, par2, par3);
+		if (fUsername.isEnabled())
+			fUsername.mouseClicked(par1, par2, par3);
+		if (fPassword.isEnabled())
+			fPassword.mouseClicked(par1, par2, par3);
 	}
 
 	@Override
 	protected void keyTyped(char par1, int par2) {
 		super.keyTyped(par1, par2);
 
-		fName.textboxKeyTyped(par1, par2);
-		fHost.textboxKeyTyped(par1, par2);
-		fUsername.textboxKeyTyped(par1, par2);
-		fPassword.textboxKeyTyped(par1, par2);
+		if (fName.isEnabled())
+			fName.textboxKeyTyped(par1, par2);
+		if (fHost.isEnabled())
+			fHost.textboxKeyTyped(par1, par2);
+		if (fUsername.isEnabled())
+			fUsername.textboxKeyTyped(par1, par2);
+		if (fPassword.isEnabled())
+			fPassword.textboxKeyTyped(par1, par2);
 	}
 
 }
