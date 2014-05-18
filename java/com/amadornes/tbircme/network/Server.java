@@ -1,20 +1,26 @@
 package com.amadornes.tbircme.network;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Server {
 
+	private String name;
+	
 	private String host, serverpass, username;
 	private List<String> channels, commands;
 	private boolean showIngameJoins, showIngameParts, showDeaths, showIRCJoins, showIRCParts;
 	private List<String> cmdVoice = new ArrayList<String>(), cmds = new ArrayList<String>();
+	private File configFile;
 
 	private IRCConnection irc;
 
-	public Server(String host, String serverpass, String username, List<String> channels,
+	public Server(String name, String host, String serverpass, String username, List<String> channels,
 			List<String> commands, boolean showIngameJoins, boolean showIngameParts,
-			boolean showDeaths, boolean showIRCJoins, boolean showIRCParts) {
+			boolean showDeaths, boolean showIRCJoins, boolean showIRCParts, File configFile) {
+		this.name = name;
+		
 		this.host = host;
 		this.serverpass = serverpass;
 		this.username = username;
@@ -26,6 +32,12 @@ public class Server {
 		this.showDeaths = showDeaths;
 		this.showIRCJoins = showIRCJoins;
 		this.showIRCParts = showIRCParts;
+		
+		this.configFile = configFile;
+	}
+	
+	public String getName() {
+		return name;
 	}
 
 	public String getHost() {
@@ -120,6 +132,10 @@ public class Server {
 	
 	public void removeCommand(String cmd){
 		cmds.remove(cmd);
+	}
+	
+	public File getConfigFile() {
+		return configFile;
 	}
 
 }

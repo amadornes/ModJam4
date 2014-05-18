@@ -31,12 +31,17 @@ public class CommonProxy {
 	}
 
 	private void loadServerConfig(File file) {
+		String name = "";
 		String host = "", username = "", serverpass = null;
 		List<String> commands = new ArrayList<String>(), channels = new ArrayList<String>();
 		boolean showIngameJoins = false, showIngameParts = false, showDeaths = false, showIRCJoins = false, showIRCParts = false;
 
 		Configuration cfg = new Configuration(file);
 		cfg.load();
+		// Misc section
+		{
+			name = cfg.get("misc", "serverName", "Server").getString();
+		}
 		// Login section
 		{
 			host = cfg
@@ -77,9 +82,9 @@ public class CommonProxy {
 			cfg.save();
 			return;
 		}
-		Server sv = new Server(host.trim(), serverpass.trim().length() == 0 ? null
+		Server sv = new Server(name.trim(), host.trim(), serverpass.trim().length() == 0 ? null
 				: serverpass.trim(), username.trim(), channels, commands, showIngameJoins,
-				showIngameParts, showDeaths, showIRCJoins, showIRCParts);
+				showIngameParts, showDeaths, showIRCJoins, showIRCParts, file);
 
 		// Permissions
 		{
@@ -102,6 +107,10 @@ public class CommonProxy {
 		Configuration cfg = new Configuration(file);
 		cfg.load();
 		{
+			// Misc section
+			{
+				cfg.get("misc", "serverName", "Server");
+			}
 			// Login section
 			{
 				cfg.get("login", "host", "",

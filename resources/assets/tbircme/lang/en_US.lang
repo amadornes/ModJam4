@@ -1,3 +1,11 @@
+tbircme.name=The Best IRC Mod Ever
+
 tbircme.config.client.title=Client Settings
 tbircme.config.client.emotes.enable=Enable Emotes
 tbircme.config.client.emotes.disable=Disable Emotes
+
+tbircme.config.servers.title=Servers
+tbircme.config.servers.channels=channels
+
+tbircme.config.add=Add
+tbircme.config.remove=Remove

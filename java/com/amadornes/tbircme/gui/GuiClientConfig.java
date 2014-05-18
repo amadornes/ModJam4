@@ -19,9 +19,8 @@ import com.amadornes.tbircme.util.ReflectionUtils;
 public class GuiClientConfig extends GuiScreen {
 
 	private boolean initialized = false;
-	
+
 	private GuiButtonToggle btnEmotes;
-	@SuppressWarnings("unused")
 	private GuiButton btn1, btn2, btn3, btn4, btn5, btn6;
 
 	public GuiClientConfig() {
@@ -31,89 +30,81 @@ public class GuiClientConfig extends GuiScreen {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
-        Keyboard.enableRepeatEvents(true);
-        
-        // Emote button
-        {
-        	int btnEmotesSize = 20;
-    		int btnEmotesDist = 10;
-    		buttonList.add(btnEmotes = new GuiButtonToggle(0, width - btnEmotesSize - btnEmotesDist,
-    				btnEmotesDist, btnEmotesSize, btnEmotesSize, ""));
-    		btnEmotes.setState(Config.emotesEnabled);
-        }
-        
-        int sepH = 20;
-        int sepV = 10;
-        int btnHeight = 20;
-        int btnWidth = 100;
-        int vert = 3;
-        int hor = 2;
-        int max = 6;
-        
-        for(int x = 0; x < hor; x++){
-        	for(int y = 0; y < vert; y++){
-        		int id = y * hor + x + 1;
-        		if(id > max)
-        			continue;
-        		int btnx = (width/2);
-        		int btny = 0;
-        		GuiButton b = new GuiButton(id, btnx, btny, btnWidth, btnHeight, "");
-        		buttonList.add(b);
-        		ReflectionUtils.set(this, "btn" + id, b);
-        	}
-        }
-        
-		
+		Keyboard.enableRepeatEvents(true);
+
+		// Emote button
+		{
+			int btnEmotesSize = 20;
+			int btnEmotesDist = 10;
+			buttonList.add(btnEmotes = new GuiButtonToggle(0,
+					width - btnEmotesSize - btnEmotesDist, btnEmotesDist, btnEmotesSize,
+					btnEmotesSize, ""));
+			btnEmotes.setState(Config.emotesEnabled);
+		}
+
+		int sepH = 20;
+		int sepV = 10;
+		int btnHeight = 20;
+		int btnWidth = 150;
+		int vert = 3;
+		int hor = 2;
+		int max = 6;
+
+		for (int x = 0; x < hor; x++) {
+			for (int y = 0; y < vert; y++) {
+				int id = y * hor + x + 1;
+				if (id > max)
+					continue;
+				int btnx = (width / 2) - (btnWidth / 2)
+						+ ((int) ((btnWidth + sepH) * (((x / ((double) (hor - 1))) - (1D / hor)))));
+				int btny = (height / 2)
+						- (btnHeight / 2)
+						+ ((int) ((double) (((btnHeight + sepV) * 2 * (((y / ((double) (vert - 1))) - (1D / vert)))))));
+				GuiButton b = new GuiButton(id, btnx, btny, btnWidth, btnHeight, "");
+				buttonList.add(b);
+				ReflectionUtils.set(this, "btn" + id, b);
+			}
+		}
+
+		btn1.displayString = I18n.format(ModInfo.MODID + ".config.servers.title",
+				new Object[0]);
+
 		initialized = true;
 	}
 
 	@Override
 	public void drawScreen(int mx, int my, float frame) {
 		this.drawGradientRect(0, 0, this.width, this.height, 0xC010100F, 0xD010100F);
-		
-		int sepH = 20;
-        int sepV = 10;
-        int btnHeight = 20;
-        int btnWidth = 100;
-        int vert = 3;
-        int hor = 2;
-        int max = 6;
-        
-        for(int x = 0; x < hor; x++){
-        	for(int y = 0; y < vert; y++){
-        		int id = y * hor + x + 1;
-        		if(id > max)
-        			continue;
-        		int btnx = (width/2) - (btnWidth/2);
-        		btnx += ((btnWidth/2) + (sepH/2)) * ((hor * 2) - x);
-        		int btny = 0;
-        		GuiButton b = (GuiButton) ReflectionUtils.get(this, "btn" + id);
-        		b.xPosition = btnx;
-        		b.yPosition = btny;
-        	}
-        }
-		
-		this.drawCenteredString(this.fontRendererObj, I18n.format(ModInfo.MODID + ".config.client.title", new Object[0]), this.width / 2, 20, 16777215);
 
-		if(!initialized)
+		GL11.glPushMatrix();
+		GL11.glTranslated(this.width / 2, 20, 0);
+		GL11.glScaled(3, 3, 1);
+		this.drawCenteredString(this.fontRendererObj,
+				I18n.format(ModInfo.MODID + ".name", new Object[0]), 0, 0, 0x96F2F2);
+		GL11.glPopMatrix();
+		this.drawCenteredString(this.fontRendererObj,
+				I18n.format(ModInfo.MODID + ".config.client.title", new Object[0]), this.width / 2,
+				67, 16777215);
+
+		if (!initialized)
 			return;
-		
+
 		// Draw other buttons
 		{
-			if(btn1 != null)
+			if (btn1 != null)
 				btn1.drawButton(mc, mx, my);
-			if(btn2 != null)
+			if (btn2 != null)
 				btn2.drawButton(mc, mx, my);
-			if(btn3 != null)
+			if (btn3 != null)
 				btn3.drawButton(mc, mx, my);
-			if(btn4 != null)
+			if (btn4 != null)
 				btn4.drawButton(mc, mx, my);
-			if(btn5 != null)
+			if (btn5 != null)
 				btn5.drawButton(mc, mx, my);
-			if(btn6 != null)
+			if (btn6 != null)
 				btn6.drawButton(mc, mx, my);
 		}
-		
+
 		// Draw emote toggle button
 		{
 			btnEmotes.drawButton(mc, mx, my);
@@ -127,9 +118,14 @@ public class GuiClientConfig extends GuiScreen {
 				RenderHelper.drawTexturedRect(btnEmotes.xPosition + 2, btnEmotes.yPosition + 2, 0,
 						0, btnEmotes.getButtonWidth() - 4, btnEmotes.getButtonWidth() - 4);
 			}
-			
-			if(mx >= btnEmotes.xPosition && mx < btnEmotes.xPosition + btnEmotes.getButtonWidth() && my >= btnEmotes.yPosition && my < btnEmotes.yPosition + btnEmotes.getButtonWidth()){
-				drawHoveringText(Arrays.asList(new String[]{btnEmotes.getState() ? I18n.format(ModInfo.MODID + ".config.client.emotes.disable", new Object[0]) : I18n.format(ModInfo.MODID + ".config.client.emotes.enable", new Object[0])}), mx, my, mc.fontRenderer);
+
+			if (mx >= btnEmotes.xPosition && mx < btnEmotes.xPosition + btnEmotes.getButtonWidth()
+					&& my >= btnEmotes.yPosition
+					&& my < btnEmotes.yPosition + btnEmotes.getButtonWidth()) {
+				drawHoveringText(Arrays.asList(new String[] { btnEmotes.getState() ? I18n.format(
+						ModInfo.MODID + ".config.client.emotes.disable", new Object[0]) : I18n
+						.format(ModInfo.MODID + ".config.client.emotes.enable", new Object[0]) }),
+						mx, my, mc.fontRenderer);
 			}
 		}
 
@@ -137,7 +133,7 @@ public class GuiClientConfig extends GuiScreen {
 
 	@Override
 	public void onGuiClosed() {
-        Keyboard.enableRepeatEvents(false);
+		Keyboard.enableRepeatEvents(false);
 	}
 
 	@Override
@@ -165,6 +161,8 @@ public class GuiClientConfig extends GuiScreen {
 	protected void actionPerformed(GuiButton btn) {
 		if (btn == btnEmotes) {
 			btnEmotes.setState(Config.emotesEnabled = !btnEmotes.getState());
+		} else if (btn == btn1) {
+			Minecraft.getMinecraft().displayGuiScreen(new GuiServerList(this));
 		}
 	}
 
