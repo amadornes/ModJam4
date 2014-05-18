@@ -12,13 +12,16 @@ import com.google.gson.JsonParser;
 
 public class EmoteAPI {
 
-	private static JsonObject emotes;
-
 	public static final void init() {
+		loadGlobalEmotes();
+		loadSubEmotes();
+	}
+
+	private static final void loadGlobalEmotes() {
 		try {
 			// URL u = new URL("http://www.twitchemotes.com/global.json");
 
-			emotes = (JsonObject) new JsonParser().parse(IOUtils.toString(Class.class
+			JsonObject emotes = (JsonObject) new JsonParser().parse(IOUtils.toString(Class.class
 					.getResourceAsStream("/assets/" + ModInfo.MODID + "/emotes/global.json")));
 			// Hardcode them to a file because they can't be loaded from the
 			// website
@@ -30,7 +33,30 @@ public class EmoteAPI {
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
-			System.exit(-1);
+		}
+	}
+
+	private static final void loadSubEmotes() {
+		try {
+			// URL u = new URL("http://www.twitchemotes.com/subscriber.json");
+
+			JsonObject channels = (JsonObject) new JsonParser().parse(IOUtils.toString(Class.class
+					.getResourceAsStream("/assets/" + ModInfo.MODID + "/emotes/subscriber.json")));
+			// Hardcode them to a file because they can't be loaded from the
+			// website
+
+			for (Entry<String, JsonElement> c : channels.entrySet()) {
+				String channel = c.getKey();
+				JsonObject emotes = (JsonObject) ((JsonObject) c.getValue()).get("emotes");
+				for (Entry<String, JsonElement> e2 : emotes.entrySet()) {
+					String emote = e2.getKey();
+					String url = e2.getValue().getAsString();
+
+					TheBestIRCModEver.emotes.add(new SubEmote(emote, channel, url));
+				}
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
 	}
 

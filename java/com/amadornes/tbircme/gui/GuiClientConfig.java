@@ -23,12 +23,11 @@ public class GuiClientConfig extends GuiScreen {
 
 	@Override
 	public void onGuiClosed() {
-		
 	}
 
 	@Override
 	protected void actionPerformed(GuiButton btn) {
-
+		
 	}
 
 }

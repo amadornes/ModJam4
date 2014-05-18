@@ -3,6 +3,8 @@ package com.amadornes.tbircme.util;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
@@ -70,6 +72,22 @@ public class Emote {
 
 	public String getEmote() {
 		return emote;
+	}
+	
+	protected List<String> tooltip;
+	
+	public List<String> getToolTip(){
+		if(tooltip == null){
+			tooltip = new ArrayList<String>();
+			tooltip.add(getEmote());
+		}
+		
+		return tooltip;
+	}
+	
+	@Override
+	public String toString() {
+		return getEmote();
 	}
 
 }
