@@ -36,6 +36,7 @@ public class RenderHandler {
 	@SuppressWarnings("rawtypes")
 	@SubscribeEvent
 	public void onRenderOverlayTick(RenderGameOverlayEvent ev) {
+		
 		if (ev.type != ElementType.CHAT)
 			return;
 

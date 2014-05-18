@@ -30,19 +30,27 @@ public class ChatComponentEmote implements IChatComponent {
 		this.comp = comp;
 	}
 
+	private String unformattedForChatOriginal = "";
+	private String unformattedForChat = null;
+
 	@Override
 	public String getUnformattedTextForChat() {
-		String s = comp.getUnformattedTextForChat();
-		for (Emote e : TheBestIRCModEver.emotes) {
-			s.replace(" " + e.getEmote() + " ", getTextForWidth(14) + "  ");
-			if (s.startsWith(e.getEmote()))
-				s.replaceFirst(e.getEmote(), getTextForWidth(14));
-			if (s.endsWith(e.getEmote()))
-				s = s.substring(0, s.length() - e.getEmote().length() - 1);
+		String str = comp.getUnformattedTextForChat();
+		if (unformattedForChat == null || !unformattedForChatOriginal.equals(str)) {
+			unformattedForChatOriginal = str;
+			String s = str;
+			for (Emote e : TheBestIRCModEver.emotes) {
+				s.replace(" " + e.getEmote() + " ", getTextForWidth(14) + "  ");
+				if (s.startsWith(e.getEmote()))
+					s.replaceFirst(e.getEmote(), getTextForWidth(14));
+				if (s.endsWith(e.getEmote()))
+					s = s.substring(0, s.length() - e.getEmote().length() - 1);
+			}
+
+			unformattedForChat = s;
 		}
-		
-		System.out.println(s);
-		return s;
+
+		return unformattedForChat;
 	}
 
 	public String getOriginalText() {
@@ -78,37 +86,55 @@ public class ChatComponentEmote implements IChatComponent {
 		return comp.iterator();
 	}
 
+	private String unformattedOriginal = "";
+	private String unformatted = null;
+
 	public final String getUnformattedText() {
 
-		String s = comp.getUnformattedText();
-		for (Emote e : TheBestIRCModEver.emotes) {
-			s.replace(" " + e + " ", getTextForWidth(14) + "  ");
-			if (s.startsWith(e.getEmote()))
-				s.replaceFirst(e.getEmote(), getTextForWidth(14));
-			if (s.endsWith(e.getEmote()))
-				s = s.substring(0, s.length() - e.getEmote().length() - 1);
+		String str = comp.getUnformattedTextForChat();
+		if (unformatted == null || !unformattedOriginal.equals(str)) {
+			unformattedOriginal = str;
+			String s = str;
+			for (Emote e : TheBestIRCModEver.emotes) {
+				s.replace(" " + e.getEmote() + " ", getTextForWidth(14) + "  ");
+				if (s.startsWith(e.getEmote()))
+					s.replaceFirst(e.getEmote(), getTextForWidth(14));
+				if (s.endsWith(e.getEmote()))
+					s = s.substring(0, s.length() - e.getEmote().length() - 1);
+			}
+
+			unformatted = s;
 		}
 
-		return s;
+		return unformatted;
 	}
+
+	private String formattedOriginal = "";
+	private String formatted = null;
 
 	@SideOnly(Side.CLIENT)
 	public final String getFormattedText() {
-		String s = comp.getFormattedText();
-		for (Emote e : TheBestIRCModEver.emotes) {
-			s = s.replace(" " + e.getEmote() + " ", getTextForWidth(14) + " ");
-			s = s.replace("\u00A7r" + e.getEmote() + " ", getTextForWidth(14));
-			s = s.replace(" " + e.getEmote() + "\u00A7r ", getTextForWidth(14) + " ");
-			s = s.replace(" " + e.getEmote() + "\u00A7r", getTextForWidth(14));
-			s = s.replace("\u00A7r" + e.getEmote() + "\u00A7r ", getTextForWidth(14));
-			s = s.replace("\u00A7r" + e.getEmote() + "\u00A7r", getTextForWidth(14));
-			if (s.startsWith(e.getEmote()))
-				s.replaceFirst(e.getEmote(), getTextForWidth(14));
-			if (s.endsWith(e.getEmote()))
-				s = s.substring(0, s.length() - e.getEmote().length() - 1);
-		}
+		String str = comp.getFormattedText();
+		if (formatted == null || !formattedOriginal.equals(str)) {
+			formattedOriginal = str;
 
-		return s;
+			String s = comp.getFormattedText();
+			for (Emote e : TheBestIRCModEver.emotes) {
+				s = s.replace(" " + e.getEmote() + " ", getTextForWidth(14) + " ");
+				s = s.replace("\u00A7r" + e.getEmote() + " ", getTextForWidth(14));
+				s = s.replace(" " + e.getEmote() + "\u00A7r ", getTextForWidth(14) + " ");
+				s = s.replace(" " + e.getEmote() + "\u00A7r", getTextForWidth(14));
+				s = s.replace("\u00A7r" + e.getEmote() + "\u00A7r ", getTextForWidth(14));
+				s = s.replace("\u00A7r" + e.getEmote() + "\u00A7r", getTextForWidth(14));
+				if (s.startsWith(e.getEmote()))
+					s.replaceFirst(e.getEmote(), getTextForWidth(14));
+				if (s.endsWith(e.getEmote()))
+					s = s.substring(0, s.length() - e.getEmote().length() - 1);
+			}
+
+			formatted = s;
+		}
+		return formatted;
 	}
 
 	@SuppressWarnings("unchecked")
