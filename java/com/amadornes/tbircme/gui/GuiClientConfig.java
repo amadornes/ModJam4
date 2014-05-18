@@ -1,30 +1,30 @@
 package com.amadornes.tbircme.gui;
 
-import java.util.Arrays;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import com.amadornes.tbircme.ModInfo;
-import com.amadornes.tbircme.render.RenderHelper;
 import com.amadornes.tbircme.util.Config;
 import com.amadornes.tbircme.util.ReflectionUtils;
 
 public class GuiClientConfig extends GuiScreen {
 
+	private GuiConfig parent;
+
 	private boolean initialized = false;
 
-	private GuiButtonToggle btnEmotes, btnPause;
 	private GuiButton btn1, btn2, btn3, btn4, btn5, btn6;
+	
+	private boolean mainMenu;
 
-	public GuiClientConfig() {
-
+	public GuiClientConfig(GuiConfig parent, boolean mainMenu) {
+		this.parent = parent;
+		this.mainMenu = mainMenu;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -32,32 +32,13 @@ public class GuiClientConfig extends GuiScreen {
 	public void initGui() {
 		Keyboard.enableRepeatEvents(true);
 
-		// Emote button
-		{
-			int btnEmotesSize = 20;
-			int btnEmotesDist = 10;
-			buttonList.add(btnEmotes = new GuiButtonToggle(0,
-					width - btnEmotesSize - btnEmotesDist, btnEmotesDist, btnEmotesSize,
-					btnEmotesSize, ""));
-			btnEmotes.setState(Config.emotesEnabled);
-		}
-
-		// Pause button
-		{
-			int btnPauseSize = 20;
-			int btnPauseDist = 10;
-			buttonList.add(btnPause = new GuiButtonToggle(7, btnPauseDist, btnPauseDist,
-					btnPauseSize, btnPauseSize, ""));
-			btnPause.setState(Config.shouldConfigGuiPauseGame);
-		}
-
 		int sepH = 20;
 		int sepV = 10;
 		int btnHeight = 20;
 		int btnWidth = 150;
 		int vert = 3;
 		int hor = 1;
-		int max = 6;
+		int max = 3;
 
 		for (int x = 0; x < hor; x++) {
 			for (int y = 0; y < vert; y++) {
@@ -114,58 +95,6 @@ public class GuiClientConfig extends GuiScreen {
 				btn6.drawButton(mc, mx, my);
 		}
 
-		// Draw emote toggle button
-		{
-			btnEmotes.drawButton(mc, mx, my);
-			Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ModInfo.MODID
-					+ ":emotes/kappa.png"));
-			RenderHelper.drawTexturedRect(btnEmotes.xPosition + 3, btnEmotes.yPosition + 3, 0, 0,
-					14, 14);
-			if (!btnEmotes.getState()) {
-				Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(
-						ModInfo.MODID + ":others/nope.png"));
-				RenderHelper.drawTexturedRect(btnEmotes.xPosition + 2, btnEmotes.yPosition + 2, 0,
-						0, btnEmotes.getButtonWidth() - 4, btnEmotes.getButtonWidth() - 4);
-			}
-
-			GL11.glEnable(GL11.GL_LIGHTING);
-			if (mx >= btnEmotes.xPosition && mx < btnEmotes.xPosition + btnEmotes.getButtonWidth()
-					&& my >= btnEmotes.yPosition
-					&& my < btnEmotes.yPosition + btnEmotes.getButtonWidth()) {
-				drawHoveringText(Arrays.asList(new String[] { btnEmotes.getState() ? I18n.format(
-						ModInfo.MODID + ".config.client.emotes.disable", new Object[0]) : I18n
-						.format(ModInfo.MODID + ".config.client.emotes.enable", new Object[0]) }),
-						mx, my, mc.fontRenderer);
-			}
-			GL11.glDisable(GL11.GL_LIGHTING);
-		}
-
-		// Draw pause toggle button
-		{
-			btnPause.drawButton(mc, mx, my);
-			Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ModInfo.MODID
-					+ ":others/pause.png"));
-			RenderHelper.drawTexturedRect(btnPause.xPosition + 3, btnPause.yPosition + 3, 0, 0, 14,
-					14);
-			if (!btnPause.getState()) {
-				Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(
-						ModInfo.MODID + ":others/nope.png"));
-				RenderHelper.drawTexturedRect(btnPause.xPosition + 2, btnPause.yPosition + 2, 0, 0,
-						btnPause.getButtonWidth() - 4, btnPause.getButtonWidth() - 4);
-			}
-
-			GL11.glEnable(GL11.GL_LIGHTING);
-			if (mx >= btnPause.xPosition && mx < btnPause.xPosition + btnPause.getButtonWidth()
-					&& my >= btnPause.yPosition
-					&& my < btnPause.yPosition + btnPause.getButtonWidth()) {
-				drawHoveringText(Arrays.asList(new String[] { btnPause.getState() ? I18n.format(
-						ModInfo.MODID + ".config.pause.disable", new Object[0]) : I18n.format(
-						ModInfo.MODID + ".config.pause.enable", new Object[0]) }), mx, my,
-						mc.fontRenderer);
-			}
-			GL11.glDisable(GL11.GL_LIGHTING);
-		}
-
 	}
 
 	@Override
@@ -196,13 +125,12 @@ public class GuiClientConfig extends GuiScreen {
 
 	@Override
 	protected void actionPerformed(GuiButton btn) {
-		if (btn == btnEmotes) {
-			btnEmotes.setState(Config.emotesEnabled = !btnEmotes.getState());
-		} else if (btn == btnPause) {
-			btnPause.setState(Config.shouldConfigGuiPauseGame = !btnPause.getState());
-			Minecraft.getMinecraft().displayGuiScreen(new GuiClientConfig());
-		} else if (btn == btn1) {
-			Minecraft.getMinecraft().displayGuiScreen(new GuiServerList(this));
+		if (btn == btn1) {
+			Minecraft.getMinecraft().displayGuiScreen(new GuiServerList(this, mainMenu));
+		} else if (btn == btn2) {
+
+		} else if (btn == btn3) {
+			Minecraft.getMinecraft().displayGuiScreen(parent);
 		}
 	}
 

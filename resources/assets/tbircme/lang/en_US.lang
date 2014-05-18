@@ -1,5 +1,6 @@
 tbircme.name=The Best IRC Mod Ever
 
+tbircme.config.title=Settings
 tbircme.config.client.title=Client Settings
 tbircme.config.client.emotes.enable=Enable Emotes
 tbircme.config.client.emotes.disable=Disable Emotes
@@ -27,6 +28,7 @@ tbircme.config.servers.placeholder.username=Username
 tbircme.config.servers.placeholder.password=Server password (not NickServ!)
 tbircme.config.servers.placeholder.password.tooltip=This is the server password. You can use this to login with twitch (oauth code), for example.
 
+tbircme.config.server.title=Server Settings
 
 tbircme.config.add=Add
 tbircme.config.remove=Remove

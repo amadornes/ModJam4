@@ -64,7 +64,7 @@ public class RenderHandler {
 
 		if (chatLines == null)
 			return;
-
+		
 		int i = 0;
 		for (Object o : chatLines) {
 			ChatLine l = (ChatLine) o;
@@ -93,10 +93,11 @@ public class RenderHandler {
 		GL11.glPopMatrix();
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void renderEmotesForLine(ChatLine l, ChatLine l2, GuiNewChat chat, List chatLines,
 			List chatLines2, boolean isOpen, RenderGameOverlayEvent ev) {
 
+		
 		// Make it an emote line :D
 		if (!(l.func_151461_a() instanceof ChatComponentEmote)
 				|| !(l2.func_151461_a() instanceof ChatComponentEmote)) {
@@ -107,7 +108,12 @@ public class RenderHandler {
 		ChatComponentEmote cc = (ChatComponentEmote) l.func_151461_a();
 
 		FontRenderer fr = Minecraft.getMinecraft().fontRenderer;
-		int id = chatLines.indexOf(l);
+		int id = 0;
+		for(ChatLine l3 : ((List<ChatLine>)chatLines)){
+			if(l3 == l)
+				break;
+			id += fr.listFormattedStringToWidth(((ChatComponentEmote)l3.func_151461_a()).getOriginalText(), (int)(Minecraft.getMinecraft().gameSettings.chatWidth * 320)).size();
+		}
 		int id2 = (id - ((Integer) ReflectionUtils.get(chat, "field_146250_j")));
 		if ((id2 + 1) * 9 > (isOpen ? Minecraft.getMinecraft().gameSettings.chatHeightFocused
 				: Minecraft.getMinecraft().gameSettings.chatHeightUnfocused) * 180 || id2 < 0)
@@ -145,55 +151,58 @@ public class RenderHandler {
 				if (emoteL == null) {
 					emoteL = new ArrayList<EmoteWrapper>();
 					cc.setEmotes(emoteL);
-					String unformatted = cc.getOriginalText().trim();
-					String s = unformatted;
-					int index = 0;
-					int lastIndex = 0;
-					int translation = 0;
+					List lines = fr.listFormattedStringToWidth(cc.getOriginalText().trim(), (int)(Minecraft.getMinecraft().gameSettings.chatWidth * 320));
+					for(int i4 = 0; i4 < lines.size(); i4++){
+						String unformatted = (String) lines.get(i4);
+						String s = unformatted;
+						int index = 0;
+						int lastIndex = 0;
+						int translation = 0;
 
-					boolean found = false;
-					do {
-						found = false;
-						Emote emote = null;
-						int i = s.length();
+						boolean found = false;
+						do {
+							found = false;
+							Emote emote = null;
+							int i = s.length();
 
-						for (Emote e : TheBestIRCModEver.emotes) {
-							if (s.contains(" " + e.getEmote() + " ")
-									|| s.startsWith(e.getEmote() + " ")
-									|| (s.startsWith(e.getEmote()) && s.length() == e.getEmote()
-											.length())
-									|| s.endsWith(" " + e.getEmote())
-									|| (s.endsWith(e.getEmote()) && s.length() == e.getEmote()
-											.length())) {
-								if (!e.hasFile()) {
-									e.download();
-									continue;
-								}
+							for (Emote e : TheBestIRCModEver.emotes) {
+								if (s.contains(" " + e.getEmote() + " ")
+										|| s.startsWith(e.getEmote() + " ")
+										|| (s.startsWith(e.getEmote()) && s.length() == e.getEmote()
+												.length())
+										|| s.endsWith(" " + e.getEmote())
+										|| (s.endsWith(e.getEmote()) && s.length() == e.getEmote()
+												.length())) {
+									if (!e.hasFile()) {
+										e.download();
+										continue;
+									}
 
-								found = true;
-								int i3 = s.indexOf(e.getEmote());
-								if (i3 < i) {
-									i = i3;
-									emote = e;
+									found = true;
+									int i3 = s.indexOf(e.getEmote());
+									if (i3 < i) {
+										i = i3;
+										emote = e;
+									}
 								}
 							}
-						}
 
-						if (found) {
-							lastIndex = index;
-							index += s.indexOf(emote.getEmote());
-							s = s.substring(s.indexOf(emote.getEmote()) + emote.getEmote().length());
-						}
+							if (found) {
+								lastIndex = index;
+								index += s.indexOf(emote.getEmote());
+								s = s.substring(s.indexOf(emote.getEmote()) + emote.getEmote().length());
+							}
 
-						if (found) {
-							String before = unformatted.substring(lastIndex, index);
-							translation += fr.getStringWidth(before) + 7;
-							emoteL.add(new EmoteWrapper(emote, id, translation - 11));
-						}
-					} while (found);
+							if (found) {
+								String before = unformatted.substring(lastIndex, index);
+								translation += fr.getStringWidth(before) + 7;
+								emoteL.add(new EmoteWrapper(emote, lines.size() - i4 - 1, translation - 11));
+							}
+						} while (found);
+					}
 				} else {
 					for (EmoteWrapper w : emoteL) {
-						renderEmote(w.getX(), id, w.getEmote(), opacity, ev);
+						renderEmote(w.getX(), id + w.getLine(), w.getEmote(), opacity, ev);
 					}
 				}
 			}

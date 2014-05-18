@@ -39,11 +39,14 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 
 	private GuiTextFieldCustomizable fName, fHost, fUsername, fPassword;
 
+	private boolean mainMenu = false;
+
 	private boolean hasChanged = false;
 
-	public GuiServerList(GuiScreen previousGui) {
+	public GuiServerList(GuiScreen previousGui, boolean mainMenu) {
 		this.previousGui = previousGui;
 		this.servers = (ArrayList<Server>) Config.servers;
+		this.mainMenu = mainMenu;
 	}
 
 	@Override
@@ -177,6 +180,7 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 				if (selectedServer.isConnected()) {
 					selectedServer.disconnect();
 				} else {
+					selectedServer.loadConfig();
 					selectedServer.connect();
 				}
 			}
@@ -194,16 +198,9 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 		this.serverList.drawScreen(mx, my, p_571_3_);
 		this.drawCenteredString(this.fontRendererObj,
 				I18n.format(ModInfo.MODID + ".config.servers.title"), this.width / 2, 16, 0xFFFFFF);
-		// int offset = this.listWidth + 20;
-		btnAddServer.enabled = true;
-		if (selectedServer != null) {
-			btnDelServer.enabled = true;
-			GL11.glEnable(GL11.GL_BLEND);
 
-			GL11.glDisable(GL11.GL_BLEND);
-		} else {
-			btnDelServer.enabled = false;
-		}
+		btnAddServer.enabled = true;
+		btnDelServer.enabled = selectedServer != null;
 		int k;
 
 		for (k = 0; k < this.buttonList.size(); ++k) {
@@ -251,7 +248,7 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 
 		// Draw connect toggle button
 		{
-			if (selectedServer != null) {
+			if (!mainMenu && selectedServer != null) {
 				btnConnect.enabled = true;
 				btnConnect.setState(selectedServer.isConnected());
 			} else {

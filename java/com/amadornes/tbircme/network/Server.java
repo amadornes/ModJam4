@@ -15,6 +15,8 @@ public class Server {
 	private boolean showIngameJoins, showIngameParts, showDeaths, showIRCJoins, showIRCParts;
 	private List<String> cmdVoice = new ArrayList<String>(), cmds = new ArrayList<String>();
 	private File configFile;
+	
+	private boolean connecting = false;
 
 	private IRCConnection irc;
 
@@ -72,8 +74,17 @@ public class Server {
 			return false;
 		return irc.isConnected();
 	}
+	
+	public boolean isConnecting(){
+		return connecting;
+	}
 
-	public void connect() {
+	public synchronized void connect() {
+		if(connecting)
+			return;
+		
+		connecting = true;
+		
 		final Server me = this;
 		new Thread(new Runnable() {
 
@@ -95,6 +106,7 @@ public class Server {
 						irc.disconnect();
 					}
 				}));
+				connecting = false;
 			}
 		}, "[IRC] " + host).start();
 	}

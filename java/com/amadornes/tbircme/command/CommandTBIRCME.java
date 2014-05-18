@@ -1,15 +1,14 @@
 package com.amadornes.tbircme.command;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import com.amadornes.tbircme.gui.GuiClientConfig;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ChatComponentText;
+
+import com.amadornes.tbircme.gui.GuiConfig;
 
 public class CommandTBIRCME extends CommandBase {
 
@@ -26,35 +25,27 @@ public class CommandTBIRCME extends CommandBase {
 	@Override
 	public void processCommand(ICommandSender sender, String[] args) {
 		if (sender instanceof EntityPlayer) {
-			//EntityPlayer p = (EntityPlayer) sender;
+			// EntityPlayer p = (EntityPlayer) sender;
 			if (args.length == 0) {
-				sender.addChatMessage(new ChatComponentText("Available commands: cfg, svcfg"));
+				sender.addChatMessage(new ChatComponentText("Available commands: cfg"));
 			}
 
 			if (args.length >= 1) {
 				String cmd = args[0].toLowerCase();
 				if (cmd.equals("cfg")) {
-					Minecraft.getMinecraft().displayGuiScreen(new GuiClientConfig());
-				} else if (cmd.equals("svcfg")) {
-					// TODO Open config GUI for the server
+					Minecraft.getMinecraft().displayGuiScreen(new GuiConfig(false));
 				}
 			}
 		} else {
-			sender.addChatMessage(new ChatComponentText("You must be a player in order to use this command."));
+			sender.addChatMessage(new ChatComponentText(
+					"You must be a player in order to use this command."));
 		}
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
 	public List addTabCompletionOptions(ICommandSender cmd, String[] args) {
-		List<String> options = new ArrayList<String>();
-
-		if (args.length == 1) {
-			options.add("cfg");
-			options.add("svcfg");
-		}
-
-		return options.size() > 0 ? options : null;
+		return null;
 	}
 
 }
