@@ -6,15 +6,24 @@ import net.minecraft.client.gui.Gui;
 import com.amadornes.tbircme.render.RenderHelper;
 
 public class GuiCheckbox extends Gui {
-
+	
+	private IChangeListener parent;
+	
 	private int x, y, size;
 	private boolean state = false;
 	private boolean isEnabled = true;
+	private String label;
 
-	public GuiCheckbox(int x, int y, int size) {
+	public GuiCheckbox(IChangeListener parent, int x, int y, int size) {
+		this(parent, x, y, size, "");
+	}
+
+	public GuiCheckbox(IChangeListener parent, int x, int y, int size, String label) {
+		this.parent = parent;
 		this.x = x;
 		this.y = y;
 		this.size = size;
+		this.label = label;
 	}
 
 	public void drawCheckbox() {
@@ -22,13 +31,26 @@ public class GuiCheckbox extends Gui {
 				isEnabled ? -6250336 : -16777216);
 		drawRect(this.x, this.y, this.x + this.size, this.y + this.size, isEnabled ? -16777216 : 0);
 
-		drawRect(this.x + 1, this.y + 1, this.x + this.size - 1, this.y + this.size - 1,
-				isEnabled ? 0xE6F032 : -6250336);
+		if (state)
+			drawRect(this.x + 1, this.y + 1, this.x + this.size - 1, this.y + this.size - 1,
+					isEnabled ? -1774280 : -6250336);
+		
+		drawString(Minecraft.getMinecraft().fontRenderer, label, x + size + 3, y + ((int)Math.ceil(((size/2) - (7D/2D)))), isEnabled ? 16777215 : -6250336);
 	}
 
 	public void mouseClick(int x, int y, int button) {
-		if (x >= this.x && x < this.x + size && x >= this.x && x < this.x + size)
+		if (x >= this.x && x < this.x + size && y >= this.y && y < this.y + size){
 			state = !state;
+			parent.onChange(this);
+		}
+	}
+	
+	public void setLabel(String label) {
+		this.label = label;
+	}
+	
+	public String getLabel() {
+		return label;
 	}
 
 	public void setState(boolean state) {

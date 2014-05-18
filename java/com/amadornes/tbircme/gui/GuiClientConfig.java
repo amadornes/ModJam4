@@ -46,8 +46,8 @@ public class GuiClientConfig extends GuiScreen {
 		{
 			int btnPauseSize = 20;
 			int btnPauseDist = 10;
-			buttonList.add(btnPause = new GuiButtonToggle(7, btnPauseDist, btnPauseDist, btnPauseSize,
-					btnPauseSize, ""));
+			buttonList.add(btnPause = new GuiButtonToggle(7, btnPauseDist, btnPauseDist,
+					btnPauseSize, btnPauseSize, ""));
 			btnPause.setState(Config.shouldConfigGuiPauseGame);
 		}
 
@@ -75,8 +75,8 @@ public class GuiClientConfig extends GuiScreen {
 			}
 		}
 
-		btn1.displayString = I18n.format(ModInfo.MODID + ".config.servers.title",
-				new Object[0]);
+		btn1.displayString = I18n.format(ModInfo.MODID + ".config.servers.title");
+		btn3.displayString = I18n.format("gui.done");
 
 		initialized = true;
 	}
@@ -145,13 +145,13 @@ public class GuiClientConfig extends GuiScreen {
 			btnPause.drawButton(mc, mx, my);
 			Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ModInfo.MODID
 					+ ":others/pause.png"));
-			RenderHelper.drawTexturedRect(btnPause.xPosition + 3, btnPause.yPosition + 3, 0, 0,
-					14, 14);
+			RenderHelper.drawTexturedRect(btnPause.xPosition + 3, btnPause.yPosition + 3, 0, 0, 14,
+					14);
 			if (!btnPause.getState()) {
 				Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(
 						ModInfo.MODID + ":others/nope.png"));
-				RenderHelper.drawTexturedRect(btnPause.xPosition + 2, btnPause.yPosition + 2, 0,
-						0, btnPause.getButtonWidth() - 4, btnPause.getButtonWidth() - 4);
+				RenderHelper.drawTexturedRect(btnPause.xPosition + 2, btnPause.yPosition + 2, 0, 0,
+						btnPause.getButtonWidth() - 4, btnPause.getButtonWidth() - 4);
 			}
 
 			GL11.glEnable(GL11.GL_LIGHTING);
@@ -159,9 +159,9 @@ public class GuiClientConfig extends GuiScreen {
 					&& my >= btnPause.yPosition
 					&& my < btnPause.yPosition + btnPause.getButtonWidth()) {
 				drawHoveringText(Arrays.asList(new String[] { btnPause.getState() ? I18n.format(
-						ModInfo.MODID + ".config.pause.disable", new Object[0]) : I18n
-						.format(ModInfo.MODID + ".config.pause.enable", new Object[0]) }),
-						mx, my, mc.fontRenderer);
+						ModInfo.MODID + ".config.pause.disable", new Object[0]) : I18n.format(
+						ModInfo.MODID + ".config.pause.enable", new Object[0]) }), mx, my,
+						mc.fontRenderer);
 			}
 			GL11.glDisable(GL11.GL_LIGHTING);
 		}
@@ -205,7 +205,7 @@ public class GuiClientConfig extends GuiScreen {
 			Minecraft.getMinecraft().displayGuiScreen(new GuiServerList(this));
 		}
 	}
-	
+
 	@Override
 	public boolean doesGuiPauseGame() {
 		return Config.shouldConfigGuiPauseGame;

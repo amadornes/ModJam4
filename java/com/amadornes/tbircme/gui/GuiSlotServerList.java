@@ -16,7 +16,7 @@ public class GuiSlotServerList extends GuiScrollingList {
 
 	public GuiSlotServerList(GuiServerList parent, ArrayList<Server> servers, int listWidth) {
 		super(parent.getMinecraftInstance(), listWidth, parent.height, 32, parent.height - 66 + 4,
-				10, 25);
+				10, 35);
 		this.parent = parent;
 		this.servers = servers;
 	}
@@ -51,10 +51,16 @@ public class GuiSlotServerList extends GuiScrollingList {
 		Server server = servers.get(listIndex);
 		this.parent.getFontRenderer().drawString(
 				this.parent.getFontRenderer().trimStringToWidth(server.getName(), listWidth - 10),
-				this.left + 3, var3 + 2, 0xFFFFFF);
+				this.left + 3, var3 + 2, server.isConnected() ? 0xFFFFFF : 0xFF0000);
 		this.parent.getFontRenderer().drawString(
-				this.parent.getFontRenderer().trimStringToWidth(server.getChannels().size() + " " + I18n.format(ModInfo.MODID + ".config.servers.channels", new Object[0]),
-						listWidth - 10), this.left + 3, var3 + 12, 0xCCCCCC);
+				this.parent.getFontRenderer().trimStringToWidth(
+						server.getChannels().size()
+								+ " "
+								+ I18n.format(ModInfo.MODID + ".config.servers.channels"), listWidth - 10 - 5), this.left + 3 + 5, var3 + 12,
+				server.isConnected() ? 0xCCCCCC : 0xFF0000);
+		this.parent.getFontRenderer().drawString(
+				this.parent.getFontRenderer().trimStringToWidth((!server.isConnected() ? "\u00A7n" : "") + I18n.format(ModInfo.MODID + ".config.servers." + (server.isConnected() ? "connected" : "notconnected")), listWidth - 10 - 5), this.left + 3 + 5, var3 + 12 + 10,
+				server.isConnected() ? 0xCCCCCC : 0xFF0000);
 	}
 
 }

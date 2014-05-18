@@ -57,9 +57,12 @@ public class GuiTextFieldCustomizable extends Gui {
 
 	private String placeholder = "";
 	private boolean password = false;
+	
+	private IChangeListener parent;
 
-	public GuiTextFieldCustomizable(FontRenderer par1FontRenderer, int par2, int par3, int par4,
+	public GuiTextFieldCustomizable(IChangeListener parent, FontRenderer par1FontRenderer, int par2, int par3, int par4,
 			int par5) {
+		this.parent = parent;
 		this.field_146211_a = par1FontRenderer;
 		this.xPosition = par2;
 		this.yPosition = par3;
@@ -306,9 +309,17 @@ public class GuiTextFieldCustomizable extends Gui {
 	 * Call this method from your GuiScreen to process the keys into the textbox
 	 */
 	public boolean textboxKeyTyped(char p_146201_1_, int p_146201_2_) {
+		boolean ret = textboxKeyTyped_(p_146201_1_, p_146201_2_);
+		if(ret)
+			parent.onChange(this);
+		return ret;
+	}
+	
+	private boolean textboxKeyTyped_(char p_146201_1_, int p_146201_2_) {
 		if (!this.isFocused) {
 			return false;
 		} else {
+			
 			switch (p_146201_1_) {
 			case 1:
 				this.setCursorPositionEnd();

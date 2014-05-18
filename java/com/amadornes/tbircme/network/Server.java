@@ -275,7 +275,7 @@ public class Server {
 		cfg.load();
 		// Misc section
 		{
-			cfg.get("misc", "serverName", name).set(name);
+			cfg.get("misc", "serverName", name).set(name == null ? "Server" : name);
 		}
 		// Login section
 		{
@@ -284,7 +284,7 @@ public class Server {
 					.set(host);
 			cfg.get("login", "pass", serverpass,
 					"The server's password (if using twitch, this is your oauth code).").set(
-					serverpass);
+					serverpass == null ? "" : serverpass);
 			cfg.get("login", "username", username,
 					"Username the bridge will use when connected to this server.").set(username);
 			String[] cmds = commands.toArray(new String[] {});

@@ -6,6 +6,16 @@ tbircme.config.client.emotes.disable=Disable Emotes
 
 tbircme.config.servers.title=Servers
 tbircme.config.servers.channels=channels
+tbircme.config.servers.connected=Connected
+tbircme.config.servers.notconnected=NOT CONNECTED
+
+tbircme.config.save=Save
+
+tbircme.config.servers.checkbox.showIngameJoins=Show game joins
+tbircme.config.servers.checkbox.showIngameParts=Show game parts
+tbircme.config.servers.checkbox.showDeaths=Show deaths
+tbircme.config.servers.checkbox.showIRCJoins=Show IRC joins
+tbircme.config.servers.checkbox.showIRCParts=Show IRC parts
 
 tbircme.config.servers.placeholder.name=Server name
 tbircme.config.servers.placeholder.host=Server host (i.e. irc.esper.net)
