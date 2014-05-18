@@ -2,6 +2,7 @@ package com.amadornes.tbircme.gui;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 import net.minecraft.client.Minecraft;
@@ -11,6 +12,7 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiLabel;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.ResourceLocation;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -18,6 +20,7 @@ import org.lwjgl.opengl.GL11;
 import com.amadornes.tbircme.ModInfo;
 import com.amadornes.tbircme.TheBestIRCModEver;
 import com.amadornes.tbircme.network.Server;
+import com.amadornes.tbircme.render.RenderHelper;
 import com.amadornes.tbircme.util.Config;
 
 public class GuiServerList extends GuiScreen implements IChangeListener {
@@ -30,6 +33,7 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 	private GuiButton btnAddServer;
 	private GuiButton btnDelServer;
 	private GuiButton btnDone;
+	private GuiButtonToggle btnConnect;
 
 	private GuiCheckbox cbDeath, cbGameJoin, cbGameLeave, cbIRCJoin, cbIRCLeave;
 
@@ -119,6 +123,11 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 		cbIRCLeave = new GuiCheckbox(this, 10 + listWidth + 10, 32 + 20 + 5 + 20 + 5 + 20 + 5 + 20
 				+ 5 + cbSize + 5 + cbSize + 5 + cbSize + 5 + cbSize + 5, cbSize,
 				I18n.format(ModInfo.MODID + ".config.servers.checkbox.showIRCParts"));
+
+		int btnSize = 20;
+		int btnDist = 10;
+		buttonList.add(btnConnect = new GuiButtonToggle(10, width - btnSize - btnDist, btnDist,
+				btnSize, btnSize, ""));
 	}
 
 	private static Random rnd = new Random();
@@ -164,6 +173,13 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 				selectServerIndex(servers.size() - 1);
 				return;
 			}
+			if (button == btnConnect) {
+				if (selectedServer.isConnected()) {
+					selectedServer.disconnect();
+				} else {
+					selectedServer.connect();
+				}
+			}
 		}
 		super.actionPerformed(button);
 	}
@@ -174,8 +190,8 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 	}
 
 	@Override
-	public void drawScreen(int p_571_1_, int p_571_2_, float p_571_3_) {
-		this.serverList.drawScreen(p_571_1_, p_571_2_, p_571_3_);
+	public void drawScreen(int mx, int my, float p_571_3_) {
+		this.serverList.drawScreen(mx, my, p_571_3_);
 		this.drawCenteredString(this.fontRendererObj,
 				I18n.format(ModInfo.MODID + ".config.servers.title"), this.width / 2, 16, 0xFFFFFF);
 		// int offset = this.listWidth + 20;
@@ -191,11 +207,11 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 		int k;
 
 		for (k = 0; k < this.buttonList.size(); ++k) {
-			((GuiButton) this.buttonList.get(k)).drawButton(this.mc, p_571_1_, p_571_2_);
+			((GuiButton) this.buttonList.get(k)).drawButton(this.mc, mx, my);
 		}
 
 		for (k = 0; k < this.labelList.size(); ++k) {
-			((GuiLabel) this.labelList.get(k)).func_146159_a(this.mc, p_571_1_, p_571_2_);
+			((GuiLabel) this.labelList.get(k)).func_146159_a(this.mc, mx, my);
 		}
 
 		if (selectedServer != null) {
@@ -233,16 +249,57 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 		cbIRCJoin.drawCheckbox();
 		cbIRCLeave.drawCheckbox();
 
-		fName.renderTooltip(p_571_1_, p_571_2_);
-		fHost.renderTooltip(p_571_1_, p_571_2_);
-		fUsername.renderTooltip(p_571_1_, p_571_2_);
-		fPassword.renderTooltip(p_571_1_, p_571_2_);
+		// Draw connect toggle button
+		{
+			if (selectedServer != null) {
+				btnConnect.enabled = true;
+				btnConnect.setState(selectedServer.isConnected());
+			} else {
+				btnConnect.enabled = false;
+			}
 
-		cbGameJoin.renderTooltip(p_571_1_, p_571_2_);
-		cbGameLeave.renderTooltip(p_571_1_, p_571_2_);
-		cbDeath.renderTooltip(p_571_1_, p_571_2_);
-		cbIRCJoin.renderTooltip(p_571_1_, p_571_2_);
-		cbIRCLeave.renderTooltip(p_571_1_, p_571_2_);
+			btnConnect.drawButton(mc, mx, my);
+
+			if (selectedServer != null) {
+				if (btnConnect.getState()) {
+					Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(
+							ModInfo.MODID + ":others/yup.png"));
+					RenderHelper.drawTexturedRect(btnConnect.xPosition + 2,
+							btnConnect.yPosition + 2, 0, 0, btnConnect.getButtonWidth() - 4,
+							btnConnect.getButtonWidth() - 4);
+				} else {
+					Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(
+							ModInfo.MODID + ":others/nope.png"));
+					RenderHelper.drawTexturedRect(btnConnect.xPosition + 2,
+							btnConnect.yPosition + 2, 0, 0, btnConnect.getButtonWidth() - 4,
+							btnConnect.getButtonWidth() - 4);
+				}
+			}
+
+			GL11.glEnable(GL11.GL_LIGHTING);
+			if (mx >= btnConnect.xPosition
+					&& mx < btnConnect.xPosition + btnConnect.getButtonWidth()
+					&& my >= btnConnect.yPosition
+					&& my < btnConnect.yPosition + btnConnect.getButtonWidth()) {
+				drawHoveringText(Arrays.asList(new String[] { selectedServer != null ? (btnConnect
+						.getState() ? I18n.format(ModInfo.MODID + ".config.servers.disconnect")
+						: I18n.format(ModInfo.MODID + ".config.servers.connect")) : I18n
+						.format(ModInfo.MODID + ".config.servers.select") }), mx, my,
+						mc.fontRenderer);
+			}
+			GL11.glDisable(GL11.GL_LIGHTING);
+		}
+
+		fName.renderTooltip(mx, my);
+		fHost.renderTooltip(mx, my);
+		fUsername.renderTooltip(mx, my);
+		fPassword.renderTooltip(mx, my);
+
+		cbGameJoin.renderTooltip(mx, my);
+		cbGameLeave.renderTooltip(mx, my);
+		cbDeath.renderTooltip(mx, my);
+		cbIRCJoin.renderTooltip(mx, my);
+		cbIRCLeave.renderTooltip(mx, my);
 	}
 
 	public void confirmClicked(boolean par1, int par2) {

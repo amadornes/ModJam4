@@ -9,6 +9,10 @@ tbircme.config.servers.channels=channels
 tbircme.config.servers.connected=Connected
 tbircme.config.servers.notconnected=NOT CONNECTED
 
+tbircme.config.servers.connect=Connect
+tbircme.config.servers.disconnect=Disconnect
+tbircme.config.servers.select=Select/create a server
+
 tbircme.config.save=Save
 
 tbircme.config.servers.checkbox.showIngameJoins=Show game joins

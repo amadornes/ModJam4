@@ -54,12 +54,16 @@ public class GuiSlotServerList extends GuiScrollingList {
 				this.left + 3, var3 + 2, server.isConnected() ? 0xFFFFFF : 0xFF0000);
 		this.parent.getFontRenderer().drawString(
 				this.parent.getFontRenderer().trimStringToWidth(
-						server.getChannels().size()
-								+ " "
-								+ I18n.format(ModInfo.MODID + ".config.servers.channels"), listWidth - 10 - 5), this.left + 3 + 5, var3 + 12,
+						server.getChannels().size() + " "
+								+ I18n.format(ModInfo.MODID + ".config.servers.channels"),
+						listWidth - 10 - 5), this.left + 3 + 5, var3 + 12,
 				server.isConnected() ? 0xCCCCCC : 0xFF0000);
 		this.parent.getFontRenderer().drawString(
-				this.parent.getFontRenderer().trimStringToWidth((!server.isConnected() ? "\u00A7n" : "") + I18n.format(ModInfo.MODID + ".config.servers." + (server.isConnected() ? "connected" : "notconnected")), listWidth - 10 - 5), this.left + 3 + 5, var3 + 12 + 10,
+				this.parent.getFontRenderer().trimStringToWidth(
+						(!server.isConnected() ? "\u00A7n" : "")
+								+ I18n.format(ModInfo.MODID + ".config.servers."
+										+ (server.isConnected() ? "connected" : "notconnected")),
+						listWidth - 10 - 5), this.left + 3 + 5, var3 + 12 + 10,
 				server.isConnected() ? 0xCCCCCC : 0xFF0000);
 	}
 
