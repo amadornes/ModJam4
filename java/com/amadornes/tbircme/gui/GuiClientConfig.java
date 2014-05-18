@@ -6,7 +6,6 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 
 import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 
 import com.amadornes.tbircme.ModInfo;
 import com.amadornes.tbircme.util.Config;
@@ -18,8 +17,8 @@ public class GuiClientConfig extends GuiScreen {
 
 	private boolean initialized = false;
 
-	private GuiButton btn1, btn2, btn3, btn4, btn5, btn6;
-	
+	private GuiButton btn1, btn2, btn3, btn4;
+
 	private boolean mainMenu;
 
 	public GuiClientConfig(GuiConfig parent, boolean mainMenu) {
@@ -57,6 +56,7 @@ public class GuiClientConfig extends GuiScreen {
 		}
 
 		btn1.displayString = I18n.format(ModInfo.MODID + ".config.servers.title");
+		btn2.displayString = I18n.format(ModInfo.MODID + ".config.channels.title");
 		btn3.displayString = I18n.format("gui.done");
 
 		initialized = true;
@@ -66,12 +66,6 @@ public class GuiClientConfig extends GuiScreen {
 	public void drawScreen(int mx, int my, float frame) {
 		this.drawGradientRect(0, 0, this.width, this.height, 0xC010100F, 0xD010100F);
 
-		GL11.glPushMatrix();
-		GL11.glTranslated(this.width / 2, 20, 0);
-		GL11.glScaled(3, 3, 1);
-		this.drawCenteredString(this.fontRendererObj,
-				I18n.format(ModInfo.MODID + ".name", new Object[0]), 0, 0, 0x96F2F2);
-		GL11.glPopMatrix();
 		this.drawCenteredString(this.fontRendererObj,
 				I18n.format(ModInfo.MODID + ".config.client.title", new Object[0]), this.width / 2,
 				67, 16777215);
@@ -89,10 +83,6 @@ public class GuiClientConfig extends GuiScreen {
 				btn3.drawButton(mc, mx, my);
 			if (btn4 != null)
 				btn4.drawButton(mc, mx, my);
-			if (btn5 != null)
-				btn5.drawButton(mc, mx, my);
-			if (btn6 != null)
-				btn6.drawButton(mc, mx, my);
 		}
 
 	}

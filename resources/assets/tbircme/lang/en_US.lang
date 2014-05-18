@@ -30,6 +30,8 @@ tbircme.config.servers.placeholder.password.tooltip=This is the server password.
 
 tbircme.config.server.title=Server Settings
 
+tbircme.config.channels.title=Channels
+
 tbircme.config.add=Add
 tbircme.config.remove=Remove
 tbircme.config.pause.enable=Enable pausing game

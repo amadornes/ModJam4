@@ -79,9 +79,7 @@ public class IRCConnection {
 			TheBestIRCModEver.log.log(Level.INFO, "Connecting to " + h + " on port " + p + "!");
 
 			try {
-				TheBestIRCModEver.log.log(Level.INFO, "Opening socket");
 				socket = new Socket(h, p);
-				TheBestIRCModEver.log.log(Level.INFO, "Opened socket");
 
 				r = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 				w = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
@@ -89,15 +87,6 @@ public class IRCConnection {
 				if (password != null && password.trim().length() != 0) {
 					sendRaw("PASS " + password);
 				}
-
-				// Clear incoming messages
-				/*
-				 * { long start = System.currentTimeMillis(); boolean received =
-				 * false; String line = ""; while ((line = r.readLine()) != null
-				 * && (r.ready() || !received) && System.currentTimeMillis() -
-				 * start < 3000) { System.out.println("R: " + line); received =
-				 * true; } }
-				 */
 
 				boolean tryAgain = false;
 				int id = 0;
@@ -202,9 +191,6 @@ public class IRCConnection {
 	}
 
 	private void onMessage(final String s) {
-
-		TheBestIRCModEver.log.log(Level.INFO, "[IRC] " + s);
-
 		if (s.startsWith("PING")) {
 			onPing(s);
 			return;
@@ -252,8 +238,11 @@ public class IRCConnection {
 				String who = s.substring(s.indexOf(" ") + 1);
 				who = s.substring(s.indexOf(" ") + 1);
 				who = s.substring(s.indexOf(" ") + 1, s.indexOf(" :"));
-				if (server.shouldShowIRCParts())
-					broadcast("* " + who + " has left the channel (" + ").");
+				if (server.shouldShowIRCParts()) {
+					for (Channel c : channels) {
+						chat(c.getChannel(), c.formatIRCConnection(who, false));
+					}
+				}
 			}
 			return;
 		}
@@ -311,8 +300,8 @@ public class IRCConnection {
 				if (server.shouldShowIRCJoins())
 					for (Object o : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
 						EntityPlayer p = (EntityPlayer) o;
-						p.addChatMessage(new ChatComponentText("* " + who
-								+ " has entered the channel."));
+						p.addChatMessage(new ChatComponentText(channel.formatIRCConnection(who,
+								true)));
 					}
 			}
 			if (s.indexOf(" PART ") == s.indexOf(" ")) {
@@ -320,8 +309,8 @@ public class IRCConnection {
 				if (server.shouldShowIRCParts())
 					for (Object o : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
 						EntityPlayer p = (EntityPlayer) o;
-						p.addChatMessage(new ChatComponentText("* " + who
-								+ " has left the channel."));
+						p.addChatMessage(new ChatComponentText(channel.formatIRCConnection(who,
+								false)));
 					}
 			}
 
@@ -390,10 +379,14 @@ public class IRCConnection {
 	}
 
 	protected void onChatMessage(String channel, String sender, String message) {
-		String msg = "[" + channel + "] <" + sender + "> " + message;
+		Channel c = null;
+		for (Channel ch : channels)
+			if (ch.getChannel().equalsIgnoreCase(channel))
+				c = ch;
+
+		String msg = c.formatIRCMessage(sender, message);
 		if (message.trim().startsWith("ACTION ") && !message.startsWith("ACTION ")) {
-			msg = "[" + channel + "] * " + sender + " "
-					+ message.trim().substring("ACTION ".length());
+			msg = c.formatIRCEmote(sender, message);
 		}
 
 		for (Object o : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
@@ -404,7 +397,8 @@ public class IRCConnection {
 
 	@SubscribeEvent
 	public void onIngameChat(ServerChatEvent ev) {
-		broadcast("<" + ev.username + "> " + ev.message);
+		for (Channel c : channels)
+			chat(c.getChannel(), c.formatChatMessage(ev.username, ev.message));
 	}
 
 	@SubscribeEvent
@@ -414,25 +408,29 @@ public class IRCConnection {
 			for (String s : ev.parameters)
 				msg += s + " ";
 			msg = msg.trim();
-			broadcast("* \002" + ev.sender.getCommandSenderName() + "\002 " + msg);
+			for (Channel c : channels)
+				chat(c.getChannel(), c.formatChatEmote(ev.sender.getCommandSenderName(), msg));
 		}
 	}
 
 	public void onPlayerJoin(String p) {
 		if (server.shouldShowIngameJoins())
-			broadcast("* " + p + " has joined the game.");
+			for (Channel c : channels)
+				chat(c.getChannel(), c.formatChatConnection(p, true));
 	}
 
 	public void onPlayerLeave(String p) {
 		if (server.shouldShowIngameParts())
-			broadcast("* " + p + " has left the game.");
+			for (Channel c : channels)
+				chat(c.getChannel(), c.formatChatConnection(p, false));
 	}
 
 	public void onPlayerDie(String p, LivingDeathEvent ev) {
 		try {
 			if (server.shouldShowDeaths())
-				broadcast("* "
-						+ ev.source.func_151519_b(ev.entityLiving).getUnformattedTextForChat());
+				for (Channel c : channels)
+					chat(c.getChannel(), c.formatDeath(ev.source.func_151519_b(ev.entityLiving)
+							.getUnformattedTextForChat()));
 		} catch (Exception ex) {
 		}
 	}
@@ -525,6 +523,10 @@ public class IRCConnection {
 
 	public String getHost() {
 		return host;
+	}
+
+	public List<Channel> getChannels() {
+		return channels;
 	}
 
 }

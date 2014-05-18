@@ -3,34 +3,23 @@ package com.amadornes.tbircme;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiScreen;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 
 import com.amadornes.tbircme.command.CommandTBIRCME;
 import com.amadornes.tbircme.emote.Emote;
 import com.amadornes.tbircme.emote.EmoteAPI;
-import com.amadornes.tbircme.gui.GuiConfig;
 import com.amadornes.tbircme.network.IRCConnection;
 import com.amadornes.tbircme.packet.PacketHandler;
 import com.amadornes.tbircme.proxy.CommonProxy;
-import com.amadornes.tbircme.util.ReflectionUtils;
-import com.google.common.collect.BiMap;
 
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.client.IModGuiFactory;
 import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.LoaderState;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
 import cpw.mods.fml.common.Mod.Instance;
-import cpw.mods.fml.common.ModContainer;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
