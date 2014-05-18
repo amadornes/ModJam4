@@ -9,3 +9,5 @@ tbircme.config.servers.channels=channels
 
 tbircme.config.add=Add
 tbircme.config.remove=Remove
+tbircme.config.pause.enable=Enable pausing game
+tbircme.config.pause.disable=Disable pausing game

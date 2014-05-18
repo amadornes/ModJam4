@@ -31,6 +31,11 @@ public class GuiServerList extends GuiScreen {
 		this.servers = (ArrayList<Server>) Config.servers;
 	}
 
+	@Override
+	public boolean doesGuiPauseGame() {
+		return Config.shouldConfigGuiPauseGame;
+	}
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
@@ -112,6 +117,7 @@ public class GuiServerList extends GuiScreen {
 				selectedServer.getConnection().disconnect();
 				if (selectedServer.getConfigFile().exists())
 					selectedServer.getConfigFile().delete();
+				Minecraft.getMinecraft().displayGuiScreen(this);
 			}
 		}
 	}

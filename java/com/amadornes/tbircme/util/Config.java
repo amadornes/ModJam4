@@ -12,6 +12,7 @@ public class Config {
 	public static String command = "tbircme cmd";
 	
 	public static boolean emotesEnabled = true;
+	public static boolean shouldConfigGuiPauseGame = true;
 	
 	public static void saveConfig(){
 		

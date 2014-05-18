@@ -20,7 +20,7 @@ public class GuiClientConfig extends GuiScreen {
 
 	private boolean initialized = false;
 
-	private GuiButtonToggle btnEmotes;
+	private GuiButtonToggle btnEmotes, btnPause;
 	private GuiButton btn1, btn2, btn3, btn4, btn5, btn6;
 
 	public GuiClientConfig() {
@@ -40,6 +40,15 @@ public class GuiClientConfig extends GuiScreen {
 					width - btnEmotesSize - btnEmotesDist, btnEmotesDist, btnEmotesSize,
 					btnEmotesSize, ""));
 			btnEmotes.setState(Config.emotesEnabled);
+		}
+
+		// Pause button
+		{
+			int btnPauseSize = 20;
+			int btnPauseDist = 10;
+			buttonList.add(btnPause = new GuiButtonToggle(7, btnPauseDist, btnPauseDist, btnPauseSize,
+					btnPauseSize, ""));
+			btnPause.setState(Config.shouldConfigGuiPauseGame);
 		}
 
 		int sepH = 20;
@@ -119,6 +128,7 @@ public class GuiClientConfig extends GuiScreen {
 						0, btnEmotes.getButtonWidth() - 4, btnEmotes.getButtonWidth() - 4);
 			}
 
+			GL11.glEnable(GL11.GL_LIGHTING);
 			if (mx >= btnEmotes.xPosition && mx < btnEmotes.xPosition + btnEmotes.getButtonWidth()
 					&& my >= btnEmotes.yPosition
 					&& my < btnEmotes.yPosition + btnEmotes.getButtonWidth()) {
@@ -127,6 +137,33 @@ public class GuiClientConfig extends GuiScreen {
 						.format(ModInfo.MODID + ".config.client.emotes.enable", new Object[0]) }),
 						mx, my, mc.fontRenderer);
 			}
+			GL11.glDisable(GL11.GL_LIGHTING);
+		}
+
+		// Draw pause toggle button
+		{
+			btnPause.drawButton(mc, mx, my);
+			Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(ModInfo.MODID
+					+ ":others/pause.png"));
+			RenderHelper.drawTexturedRect(btnPause.xPosition + 3, btnPause.yPosition + 3, 0, 0,
+					14, 14);
+			if (!btnPause.getState()) {
+				Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(
+						ModInfo.MODID + ":others/nope.png"));
+				RenderHelper.drawTexturedRect(btnPause.xPosition + 2, btnPause.yPosition + 2, 0,
+						0, btnPause.getButtonWidth() - 4, btnPause.getButtonWidth() - 4);
+			}
+
+			GL11.glEnable(GL11.GL_LIGHTING);
+			if (mx >= btnPause.xPosition && mx < btnPause.xPosition + btnPause.getButtonWidth()
+					&& my >= btnPause.yPosition
+					&& my < btnPause.yPosition + btnPause.getButtonWidth()) {
+				drawHoveringText(Arrays.asList(new String[] { btnPause.getState() ? I18n.format(
+						ModInfo.MODID + ".config.pause.disable", new Object[0]) : I18n
+						.format(ModInfo.MODID + ".config.pause.enable", new Object[0]) }),
+						mx, my, mc.fontRenderer);
+			}
+			GL11.glDisable(GL11.GL_LIGHTING);
 		}
 
 	}
@@ -161,9 +198,17 @@ public class GuiClientConfig extends GuiScreen {
 	protected void actionPerformed(GuiButton btn) {
 		if (btn == btnEmotes) {
 			btnEmotes.setState(Config.emotesEnabled = !btnEmotes.getState());
+		} else if (btn == btnPause) {
+			btnPause.setState(Config.shouldConfigGuiPauseGame = !btnPause.getState());
+			Minecraft.getMinecraft().displayGuiScreen(new GuiClientConfig());
 		} else if (btn == btn1) {
 			Minecraft.getMinecraft().displayGuiScreen(new GuiServerList(this));
 		}
+	}
+	
+	@Override
+	public boolean doesGuiPauseGame() {
+		return Config.shouldConfigGuiPauseGame;
 	}
 
 }
