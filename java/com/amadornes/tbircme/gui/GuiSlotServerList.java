@@ -16,7 +16,7 @@ public class GuiSlotServerList extends GuiScrollingList {
 
 	public GuiSlotServerList(GuiServerList parent, ArrayList<Server> servers, int listWidth) {
 		super(parent.getMinecraftInstance(), listWidth, parent.height, 32, parent.height - 66 + 4,
-				10, 35);
+				10, 25);
 		this.parent = parent;
 		this.servers = servers;
 	}

@@ -7,6 +7,13 @@ tbircme.config.client.emotes.disable=Disable Emotes
 tbircme.config.servers.title=Servers
 tbircme.config.servers.channels=channels
 
+tbircme.config.servers.placeholder.name=Server name
+tbircme.config.servers.placeholder.host=Server host (i.e. irc.esper.net)
+tbircme.config.servers.placeholder.username=Username
+tbircme.config.servers.placeholder.password=Server password (not NickServ!)
+tbircme.config.servers.placeholder.password.tooltip=This is the server password. You can use this to login with twitch (oauth code), for example.
+
+
 tbircme.config.add=Add
 tbircme.config.remove=Remove
 tbircme.config.pause.enable=Enable pausing game

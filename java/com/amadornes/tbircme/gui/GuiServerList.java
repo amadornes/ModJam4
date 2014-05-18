@@ -26,6 +26,11 @@ public class GuiServerList extends GuiScreen {
 	private GuiButton btnDelServer;
 	private GuiButton btnDone;
 
+	private GuiTextFieldCustomizable fName, fHost, fUsername, fPassword;
+
+	// private List<GuiTextFieldCustomizable> fields = new
+	// ArrayList<GuiTextFieldCustomizable>();
+
 	public GuiServerList(GuiScreen previousGui) {
 		this.previousGui = previousGui;
 		this.servers = (ArrayList<Server>) Config.servers;
@@ -61,6 +66,27 @@ public class GuiServerList extends GuiScreen {
 		this.buttonList.add(btnDelServer);
 		this.serverList = new GuiSlotServerList(this, servers, listWidth);
 		this.serverList.registerScrollButtons(this.buttonList, 7, 8);
+
+		fName = (new GuiTextFieldCustomizable(fontRendererObj, 10 + listWidth + 10, 32, 200, 20));
+		fName.setPlaceholder(I18n.format(ModInfo.MODID + ".config.servers.placeholder.name",
+				new Object[0]));
+
+		fHost = (new GuiTextFieldCustomizable(fontRendererObj, 10 + listWidth + 10, 32 + 20 + 5,
+				200, 20));
+		fHost.setPlaceholder(I18n.format(ModInfo.MODID + ".config.servers.placeholder.host",
+				new Object[0]));
+
+		fUsername = (new GuiTextFieldCustomizable(fontRendererObj, 10 + listWidth + 10, 32 + 20 + 5
+				+ 20 + 5, 200, 20));
+		fUsername.setPlaceholder(I18n.format(
+				ModInfo.MODID + ".config.servers.placeholder.username", new Object[0]));
+
+		fPassword = (new GuiTextFieldCustomizable(fontRendererObj, 10 + listWidth + 10, 32 + 20 + 5
+				+ 20 + 5 + 20 + 5, 200, 20));
+		fPassword.setPlaceholder(I18n.format(
+				ModInfo.MODID + ".config.servers.placeholder.password", new Object[0]));
+		fPassword.setTooltip(I18n.format(ModInfo.MODID
+				+ ".config.servers.placeholder.password.tooltip", new Object[0]));
 	}
 
 	@Override
@@ -107,6 +133,16 @@ public class GuiServerList extends GuiScreen {
 		for (k = 0; k < this.labelList.size(); ++k) {
 			((GuiLabel) this.labelList.get(k)).func_146159_a(this.mc, p_571_1_, p_571_2_);
 		}
+
+		fName.drawTextBox();
+		fHost.drawTextBox();
+		fUsername.drawTextBox();
+		fPassword.drawTextBox();
+
+		fName.renderTooltip(p_571_1_, p_571_2_);
+		fHost.renderTooltip(p_571_1_, p_571_2_);
+		fUsername.renderTooltip(p_571_1_, p_571_2_);
+		fPassword.renderTooltip(p_571_1_, p_571_2_);
 	}
 
 	public void confirmClicked(boolean par1, int par2) {
@@ -134,6 +170,7 @@ public class GuiServerList extends GuiScreen {
 		this.selected = var1;
 		if (var1 >= 0 && var1 <= servers.size()) {
 			this.selectedServer = servers.get(selected);
+
 		} else {
 			this.selectedServer = null;
 		}
@@ -141,6 +178,26 @@ public class GuiServerList extends GuiScreen {
 
 	public boolean serverIndexSelected(int var1) {
 		return var1 == selected;
+	}
+
+	@Override
+	protected void mouseClicked(int par1, int par2, int par3) {
+		super.mouseClicked(par1, par2, par3);
+
+		fName.mouseClicked(par1, par2, par3);
+		fHost.mouseClicked(par1, par2, par3);
+		fUsername.mouseClicked(par1, par2, par3);
+		fPassword.mouseClicked(par1, par2, par3);
+	}
+
+	@Override
+	protected void keyTyped(char par1, int par2) {
+		super.keyTyped(par1, par2);
+
+		fName.textboxKeyTyped(par1, par2);
+		fHost.textboxKeyTyped(par1, par2);
+		fUsername.textboxKeyTyped(par1, par2);
+		fPassword.textboxKeyTyped(par1, par2);
 	}
 
 }
