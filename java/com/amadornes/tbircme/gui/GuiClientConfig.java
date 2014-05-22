@@ -5,15 +5,14 @@ import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 
-import org.lwjgl.input.Keyboard;
-
 import com.amadornes.tbircme.ModInfo;
-import com.amadornes.tbircme.util.Config;
 import com.amadornes.tbircme.util.ReflectionUtils;
 
-public class GuiClientConfig extends GuiScreen {
+import cpw.mods.fml.client.GuiModList;
 
-	private GuiConfig parent;
+public class GuiClientConfig extends TBIRCMEGuiScreen {
+
+	private GuiScreen parent;
 
 	private boolean initialized = false;
 
@@ -21,15 +20,15 @@ public class GuiClientConfig extends GuiScreen {
 
 	private boolean mainMenu;
 
-	public GuiClientConfig(GuiConfig parent, boolean mainMenu) {
+	public GuiClientConfig(GuiScreen parent) {
 		this.parent = parent;
-		this.mainMenu = mainMenu;
+		this.mainMenu = parent instanceof GuiModList;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
-		Keyboard.enableRepeatEvents(true);
+		super.initGui();
 
 		int sepH = 20;
 		int sepV = 10;
@@ -88,11 +87,6 @@ public class GuiClientConfig extends GuiScreen {
 	}
 
 	@Override
-	public void onGuiClosed() {
-		Keyboard.enableRepeatEvents(false);
-	}
-
-	@Override
 	protected void keyTyped(char par1, int par2) {
 		super.keyTyped(par1, par2);
 	}
@@ -118,15 +112,10 @@ public class GuiClientConfig extends GuiScreen {
 		if (btn == btn1) {
 			Minecraft.getMinecraft().displayGuiScreen(new GuiServerList(this, mainMenu));
 		} else if (btn == btn2) {
-
+			Minecraft.getMinecraft().displayGuiScreen(new GuiChannelList(this, mainMenu));
 		} else if (btn == btn3) {
 			Minecraft.getMinecraft().displayGuiScreen(parent);
 		}
-	}
-
-	@Override
-	public boolean doesGuiPauseGame() {
-		return Config.shouldConfigGuiPauseGame;
 	}
 
 }

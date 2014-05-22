@@ -33,8 +33,9 @@ public class EventHandler {
 				// he/she left
 				if (!nPlayers.contains(p))
 					for (Server s : Config.servers)
-						if (s.shouldShowIngameParts())
-							s.getConnection().onPlayerLeave(p);
+						if (s.getConnection() != null)
+							if (s.shouldShowIngameParts())
+								s.getConnection().onPlayerLeave(p);
 			}
 			// Loop through the new list
 			for (String p : nPlayers) {
@@ -42,8 +43,9 @@ public class EventHandler {
 				// he/she joined
 				if (!players.contains(p))
 					for (Server s : Config.servers)
-						if (s.shouldShowIngameJoins())
-							s.getConnection().onPlayerJoin(p);
+						if (s.getConnection() != null)
+							if (s.shouldShowIngameJoins())
+								s.getConnection().onPlayerJoin(p);
 			}
 
 			players.clear();
@@ -57,8 +59,9 @@ public class EventHandler {
 	public void onPlayerDie(LivingDeathEvent ev) {
 		if (ev.entity instanceof EntityPlayer) {
 			for (Server s : Config.servers)
-				if (s.shouldShowDeaths())
-					s.getConnection().onPlayerDie(ev.entity.getCommandSenderName(), ev);
+				if (s.getConnection() != null)
+					if (s.shouldShowDeaths())
+						s.getConnection().onPlayerDie(ev.entity.getCommandSenderName(), ev);
 		}
 	}
 

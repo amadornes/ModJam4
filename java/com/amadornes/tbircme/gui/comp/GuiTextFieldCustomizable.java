@@ -1,4 +1,4 @@
-package com.amadornes.tbircme.gui;
+package com.amadornes.tbircme.gui.comp;
 
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
@@ -9,6 +9,7 @@ import net.minecraft.util.ChatAllowedCharacters;
 import org.lwjgl.opengl.GL11;
 
 import com.amadornes.tbircme.render.RenderHelper;
+import com.amadornes.tbircme.util.IChangeListener;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -16,11 +17,11 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class GuiTextFieldCustomizable extends Gui {
 	private final FontRenderer field_146211_a;
-	private final int xPosition;
-	private final int yPosition;
+	public int xPosition;
+	public int yPosition;
 	/** The width of this text field. */
-	private final int width;
-	private final int height;
+	public int width;
+	public int height;
 	/** Has the current text being edited on the textbox. */
 	private String text = "";
 	private int maxStringLength = 32;
@@ -57,17 +58,42 @@ public class GuiTextFieldCustomizable extends Gui {
 
 	private String placeholder = "";
 	private boolean password = false;
-	
+
 	private IChangeListener parent;
 
-	public GuiTextFieldCustomizable(IChangeListener parent, FontRenderer par1FontRenderer, int par2, int par3, int par4,
-			int par5) {
+	private int maxWidth;
+
+	public GuiTextFieldCustomizable(IChangeListener parent, FontRenderer par1FontRenderer,
+			int par2, int par3, int par4, int par5) {
 		this.parent = parent;
 		this.field_146211_a = par1FontRenderer;
 		this.xPosition = par2;
 		this.yPosition = par3;
 		this.width = par4;
 		this.height = par5;
+	}
+
+	public GuiTextFieldCustomizable(IChangeListener parent, FontRenderer par1FontRenderer,
+			int par2, int par3, int par4, int par5, int maxWidth) {
+		this.parent = parent;
+		this.field_146211_a = par1FontRenderer;
+		this.xPosition = par2;
+		this.yPosition = par3;
+		this.width = par4;
+		this.height = par5;
+		this.maxWidth = maxWidth;
+	}
+
+	public void setMaxWidth(int maxWidth) {
+		this.maxWidth = maxWidth;
+	}
+
+	public int getMaxWidth() {
+		return maxWidth;
+	}
+
+	public void setWidth(int width) {
+		this.width = Math.min(width, maxWidth);
 	}
 
 	public void updateCursorCounter() {
@@ -310,16 +336,16 @@ public class GuiTextFieldCustomizable extends Gui {
 	 */
 	public boolean textboxKeyTyped(char p_146201_1_, int p_146201_2_) {
 		boolean ret = textboxKeyTyped_(p_146201_1_, p_146201_2_);
-		if(ret)
+		if (ret)
 			parent.onChange(this);
 		return ret;
 	}
-	
+
 	private boolean textboxKeyTyped_(char p_146201_1_, int p_146201_2_) {
 		if (!this.isFocused) {
 			return false;
 		} else {
-			
+
 			switch (p_146201_1_) {
 			case 1:
 				this.setCursorPositionEnd();
@@ -441,8 +467,8 @@ public class GuiTextFieldCustomizable extends Gui {
 				l -= 4;
 			}
 
-			String s = this.field_146211_a.trimStringToWidth(
-					this.getPasswordCharsFor(text).substring(this.lineScrollOffset), this.getWidth());
+			String s = this.field_146211_a.trimStringToWidth(this.getPasswordCharsFor(text)
+					.substring(this.lineScrollOffset), this.getWidth());
 			this.setCursorPosition(this.field_146211_a.trimStringToWidth(s, l).length()
 					+ this.lineScrollOffset);
 		}
@@ -644,7 +670,7 @@ public class GuiTextFieldCustomizable extends Gui {
 	public void setEnabled(boolean p_146184_1_) {
 		this.isEnabled = p_146184_1_;
 	}
-	
+
 	public boolean isEnabled() {
 		return isEnabled;
 	}

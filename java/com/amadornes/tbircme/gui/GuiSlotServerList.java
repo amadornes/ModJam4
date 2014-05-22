@@ -2,11 +2,14 @@ package com.amadornes.tbircme.gui;
 
 import java.util.ArrayList;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.resources.I18n;
+import net.minecraft.util.ResourceLocation;
 
 import com.amadornes.tbircme.ModInfo;
 import com.amadornes.tbircme.network.Server;
+import com.amadornes.tbircme.render.RenderHelper;
 
 import cpw.mods.fml.client.GuiScrollingList;
 
@@ -65,6 +68,14 @@ public class GuiSlotServerList extends GuiScrollingList {
 										+ (server.isConnected() ? "connected" : "notconnected")),
 						listWidth - 10 - 5), this.left + 3 + 5, var3 + 12 + 10,
 				server.isConnected() ? 0xCCCCCC : 0xFF0000);
+		if(server.getHost().equalsIgnoreCase("irc.twitch.tv")){
+			int size = 16;
+			RenderHelper.drawColoredRect(this.left + listWidth - size - 10 - 1, var3 + slotHeight - size - 5 - 1, size + 2, size + 2, 0xFF333333);
+			RenderHelper.drawColoredRect(this.left + listWidth - size - 10, var3 + slotHeight - size - 5, size, size, 0xFF111111);
+			Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(
+					ModInfo.MODID + ":others/twitch.png"));
+			RenderHelper.drawTexturedRect(this.left + listWidth - size - 10, var3 + slotHeight - size - 5, 0, 0, size, size);
+		}
 	}
 
 }

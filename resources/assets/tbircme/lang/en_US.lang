@@ -13,8 +13,10 @@ tbircme.config.servers.notconnected=NOT CONNECTED
 tbircme.config.servers.connect=Connect
 tbircme.config.servers.disconnect=Disconnect
 tbircme.config.servers.select=Select/create a server
+tbircme.config.servers.editChannels=Edit channels
 
 tbircme.config.save=Save
+tbircme.config.cancel=Cancel
 
 tbircme.config.servers.checkbox.showIngameJoins=Show game joins
 tbircme.config.servers.checkbox.showIngameParts=Show game parts
@@ -31,6 +33,9 @@ tbircme.config.servers.placeholder.password.tooltip=This is the server password.
 tbircme.config.server.title=Server Settings
 
 tbircme.config.channels.title=Channels
+tbircme.config.channels.customize=Customize
+tbircme.config.channels.placeholder.name=Channel
+tbircme.config.channels.placeholder.server=Server
 
 tbircme.config.add=Add
 tbircme.config.remove=Remove

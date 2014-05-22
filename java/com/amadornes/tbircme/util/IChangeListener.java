@@ -1,4 +1,4 @@
-package com.amadornes.tbircme.gui;
+package com.amadornes.tbircme.util;
 
 import net.minecraft.client.gui.Gui;
 

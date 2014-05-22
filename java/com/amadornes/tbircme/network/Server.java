@@ -11,11 +11,12 @@ public class Server {
 	private String name;
 
 	private String host, serverpass, username;
-	private List<String> channels, commands;
+	private List<Channel> channels;
+	private List<String> commands;
 	private boolean showIngameJoins, showIngameParts, showDeaths, showIRCJoins, showIRCParts;
 	private List<String> cmdVoice = new ArrayList<String>(), cmds = new ArrayList<String>();
 	private File configFile;
-	
+
 	private boolean connecting = false;
 
 	private IRCConnection irc;
@@ -34,7 +35,6 @@ public class Server {
 		this.serverpass = serverpass;
 		this.username = username;
 		this.commands = commands;
-		this.channels = channels;
 
 		this.showIngameJoins = showIngameJoins;
 		this.showIngameParts = showIngameParts;
@@ -43,6 +43,10 @@ public class Server {
 		this.showIRCParts = showIRCParts;
 
 		this.configFile = configFile;
+
+		this.channels = new ArrayList<Channel>();
+		for(String s : channels)
+			this.channels.add(new Channel(this, s));
 	}
 
 	public String getName() {
@@ -57,7 +61,7 @@ public class Server {
 		return username;
 	}
 
-	public List<String> getChannels() {
+	public List<Channel> getChannels() {
 		return channels;
 	}
 
@@ -74,17 +78,17 @@ public class Server {
 			return false;
 		return irc.isConnected();
 	}
-	
-	public boolean isConnecting(){
+
+	public boolean isConnecting() {
 		return connecting;
 	}
 
 	public synchronized void connect() {
-		if(connecting)
+		if (connecting)
 			return;
-		
+
 		connecting = true;
-		
+
 		final Server me = this;
 		new Thread(new Runnable() {
 
@@ -97,7 +101,7 @@ public class Server {
 				for (String c : commands) {
 					irc.cmd(c);
 				}
-				for (String c : channels) {
+				for (Channel c : channels) {
 					irc.join(c);
 				}
 				Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -112,7 +116,8 @@ public class Server {
 	}
 
 	public void disconnect() {
-		irc.ragequit();
+		if (isConnected())
+			irc.ragequit();
 	}
 
 	public IRCConnection getConnection() {
@@ -256,7 +261,11 @@ public class Server {
 		this.host = host.trim();
 		this.serverpass = serverpass.trim().length() == 0 ? null : serverpass.trim();
 		this.username = username.trim();
-		this.channels = channels;
+		
+		this.channels = new ArrayList<Channel>();
+		for(String s : channels)
+			this.channels.add(new Channel(this, s));
+		
 		this.commands = commands;
 		this.showIngameJoins = showIngameJoins;
 		this.showIngameParts = showIngameParts;
@@ -305,7 +314,13 @@ public class Server {
 		}
 		// Channels section
 		{
-			String[] ch = channels.toArray(new String[] {});
+			String[] ch = new String[0];
+			try{
+				ArrayList<String> channels = new ArrayList<String>();
+				for(Channel c : this.channels)
+					channels.add(c.getChannel());
+				ch = channels.toArray(new String[] {});
+			}catch(Exception ex){}
 			cfg.get("channels", "channels", ch,
 					"Channels that the bridge will work with. One on each line.").set(ch);
 		}
@@ -319,6 +334,11 @@ public class Server {
 		}
 
 		cfg.save();
+	}
+	
+	@Override
+	public String toString() {
+		return getName();
 	}
 
 }

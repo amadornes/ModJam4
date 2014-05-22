@@ -19,23 +19,24 @@ public class CommandTBIRCME extends CommandBase {
 
 	@Override
 	public String getCommandUsage(ICommandSender var1) {
-		return "Do /tbirmce help for a detailed list of commands.";
+		return "";// return "Do /tbirmce help for a detailed list of commands.";
 	}
 
 	@Override
 	public void processCommand(ICommandSender sender, String[] args) {
 		if (sender instanceof EntityPlayer) {
 			// EntityPlayer p = (EntityPlayer) sender;
-			if (args.length == 0) {
-				sender.addChatMessage(new ChatComponentText("Available commands: cfg"));
-			}
+			// if (args.length == 0) {
+			// sender.addChatMessage(new
+			// ChatComponentText("Available commands: cfg"));
+			// }
 
-			if (args.length >= 1) {
-				String cmd = args[0].toLowerCase();
-				if (cmd.equals("cfg")) {
-					Minecraft.getMinecraft().displayGuiScreen(new GuiConfig(false));
-				}
-			}
+			// if (args.length >= 1) {
+			// String cmd = args[0].toLowerCase();
+			// if (cmd.equals("cfg")) {
+			Minecraft.getMinecraft().displayGuiScreen(new GuiConfig(false));
+			// //}
+			// }
 		} else {
 			sender.addChatMessage(new ChatComponentText(
 					"You must be a player in order to use this command."));

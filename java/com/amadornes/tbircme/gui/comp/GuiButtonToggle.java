@@ -1,4 +1,4 @@
-package com.amadornes.tbircme.gui;
+package com.amadornes.tbircme.gui.comp;
 
 import net.minecraft.client.gui.GuiButton;
 

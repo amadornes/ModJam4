@@ -47,8 +47,6 @@ public class IRCConnection {
 
 	private boolean connected = false;
 
-	private List<Channel> channels = new ArrayList<Channel>();
-
 	private IRCCommandSender commandSender;
 
 	public IRCConnection(Server server, final String host, String nick, String password) {
@@ -169,8 +167,17 @@ public class IRCConnection {
 			return;
 
 		sendRaw("JOIN #" + channel);
-		if (!channels.contains(channel.toLowerCase()))
-			channels.add(new Channel(server, channel.toLowerCase()));
+		if (!getChannels().contains(channel.toLowerCase()))
+			getChannels().add(new Channel(server, channel.toLowerCase()));
+	}
+
+	public void join(Channel channel) {
+		if (!isConnected())
+			return;
+
+		sendRaw("JOIN #" + channel);
+		if (!getChannels().contains(channel))
+			getChannels().add(channel);
 	}
 
 	public void part(String channel) {
@@ -178,8 +185,8 @@ public class IRCConnection {
 			return;
 
 		sendRaw("PART #" + channel);
-		if (channels.contains(channel.toLowerCase()))
-			channels.remove(channel.toLowerCase());
+		if (getChannels().contains(channel.toLowerCase()))
+			getChannels().remove(channel.toLowerCase());
 	}
 
 	public void chat(String channel, String message) {
@@ -190,7 +197,7 @@ public class IRCConnection {
 	}
 
 	public void broadcast(String message) {
-		for (Channel c : channels) {
+		for (Channel c : getChannels()) {
 			chat(c.getChannel(), message);
 		}
 	}
@@ -244,7 +251,7 @@ public class IRCConnection {
 				who = s.substring(s.indexOf(" ") + 1);
 				who = s.substring(s.indexOf(" ") + 1, s.indexOf(" :"));
 				if (server.shouldShowIRCParts()) {
-					for (Channel c : channels) {
+					for (Channel c : getChannels()) {
 						chat(c.getChannel(), c.formatIRCConnection(who, false));
 					}
 				}
@@ -253,7 +260,8 @@ public class IRCConnection {
 		}
 
 		if (s.indexOf(" MODE ") == s.indexOf(" ")) {
-			if (!s.endsWith("+i")) {
+			if (!s.contains(nick)) {
+				System.out.println("MODE: " + s);
 				String st = s.substring(s.indexOf(" ") + 1);
 				st = st.substring(st.indexOf(" ") + 1);
 
@@ -262,7 +270,7 @@ public class IRCConnection {
 					return;
 				ch = ch.substring(1);
 				Channel channel = null;
-				for (Channel c : channels)
+				for (Channel c : getChannels())
 					if (c.getChannel().equalsIgnoreCase(ch))
 						channel = c;
 				st = st.substring(st.indexOf(" ") + 1);
@@ -292,7 +300,7 @@ public class IRCConnection {
 
 			String ch = st.substring(1, st.contains(" ") ? st.indexOf(" ") : st.length());
 			Channel channel = null;
-			for (Channel c : channels)
+			for (Channel c : getChannels())
 				if (c.getChannel().equalsIgnoreCase(ch))
 					channel = c;
 			String who = s.substring(s.indexOf(":") + 1, s.indexOf("!"));
@@ -330,7 +338,7 @@ public class IRCConnection {
 
 			String ch = st.substring(1, st.contains(" ") ? st.indexOf(" ") : st.length());
 			Channel channel = null;
-			for (Channel c : channels)
+			for (Channel c : getChannels())
 				if (c.getChannel().equalsIgnoreCase(ch))
 					channel = c;
 			st = st.substring(st.indexOf(" ") + 1);
@@ -355,7 +363,7 @@ public class IRCConnection {
 			String nick = st.substring(1, st.contains(" ") ? st.indexOf(" ") : st.length());
 			String who = s.substring(s.indexOf(":"), s.indexOf("!"));
 
-			for (Channel c : channels)
+			for (Channel c : getChannels())
 				c.getUser(who).setUsername(nick);
 
 			return;
@@ -385,7 +393,7 @@ public class IRCConnection {
 
 	protected void onChatMessage(String channel, String sender, String message) {
 		Channel c = null;
-		for (Channel ch : channels)
+		for (Channel ch : getChannels())
 			if (ch.getChannel().equalsIgnoreCase(channel))
 				c = ch;
 
@@ -402,7 +410,7 @@ public class IRCConnection {
 
 	@SubscribeEvent
 	public void onIngameChat(ServerChatEvent ev) {
-		for (Channel c : channels)
+		for (Channel c : getChannels())
 			chat(c.getChannel(), c.formatChatMessage(ev.username, ev.message));
 	}
 
@@ -413,27 +421,27 @@ public class IRCConnection {
 			for (String s : ev.parameters)
 				msg += s + " ";
 			msg = msg.trim();
-			for (Channel c : channels)
+			for (Channel c : getChannels())
 				chat(c.getChannel(), c.formatChatEmote(ev.sender.getCommandSenderName(), msg));
 		}
 	}
 
 	public void onPlayerJoin(String p) {
 		if (server.shouldShowIngameJoins())
-			for (Channel c : channels)
+			for (Channel c : getChannels())
 				chat(c.getChannel(), c.formatChatConnection(p, true));
 	}
 
 	public void onPlayerLeave(String p) {
 		if (server.shouldShowIngameParts())
-			for (Channel c : channels)
+			for (Channel c : getChannels())
 				chat(c.getChannel(), c.formatChatConnection(p, false));
 	}
 
 	public void onPlayerDie(String p, LivingDeathEvent ev) {
 		try {
 			if (server.shouldShowDeaths())
-				for (Channel c : channels)
+				for (Channel c : getChannels())
 					chat(c.getChannel(), c.formatDeath(ev.source.func_151519_b(ev.entityLiving)
 							.getUnformattedTextForChat()));
 		} catch (Exception ex) {
@@ -476,7 +484,7 @@ public class IRCConnection {
 				if (is) {
 					try {
 						Channel ch = null;
-						for (Channel c2 : channels)
+						for (Channel c2 : getChannels())
 							if (c2.getChannel().equalsIgnoreCase(channel))
 								ch = c2;
 
@@ -531,7 +539,7 @@ public class IRCConnection {
 	}
 
 	public List<Channel> getChannels() {
-		return channels;
+		return server.getChannels();
 	}
 
 }

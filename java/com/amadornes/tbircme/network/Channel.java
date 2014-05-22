@@ -13,10 +13,10 @@ public class Channel {
 
 	private String chatFormatting = "<$u> $m";
 	private String chatFormattingIRC = "[#$c] <$u> $m";
-	
+
 	private String connectionFormatting = "* $u has $a the server.";
 	private String connectionFormattingIRC = "[#$c] * $u has $a the channel.";
-	
+
 	private String emoteFormatting = "* \002$u\002 $m";
 	private String emoteFormattingIRC = "[#$c] * \u00A7l$u\u00A7r $m";
 
@@ -86,6 +86,47 @@ public class Channel {
 
 	public String formatDeath(String message) {
 		return deathFormatting.replace("$m", message);
+	}
+
+	@Override
+	public String toString() {
+		return getChannel();
+	}
+
+	public void setChannel(String channel) {
+		this.channel = channel;
+	}
+
+	public void setChatFormatting(String chatFormatting) {
+		this.chatFormatting = chatFormatting;
+	}
+
+	public void setChatFormattingIRC(String chatFormattingIRC) {
+		this.chatFormattingIRC = chatFormattingIRC;
+	}
+
+	public void setConnectionFormatting(String connectionFormatting) {
+		this.connectionFormatting = connectionFormatting;
+	}
+
+	public void setConnectionFormattingIRC(String connectionFormattingIRC) {
+		this.connectionFormattingIRC = connectionFormattingIRC;
+	}
+
+	public void setDeathFormatting(String deathFormatting) {
+		this.deathFormatting = deathFormatting;
+	}
+
+	public void setEmoteFormatting(String emoteFormatting) {
+		this.emoteFormatting = emoteFormatting;
+	}
+
+	public void setEmoteFormattingIRC(String emoteFormattingIRC) {
+		this.emoteFormattingIRC = emoteFormattingIRC;
+	}
+
+	public void setServer(Server server) {
+		this.server = server;
 	}
 
 }

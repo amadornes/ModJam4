@@ -9,21 +9,24 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiLabel;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.ResourceLocation;
 
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import com.amadornes.tbircme.ModInfo;
 import com.amadornes.tbircme.TheBestIRCModEver;
+import com.amadornes.tbircme.gui.comp.GuiButtonCustom;
+import com.amadornes.tbircme.gui.comp.GuiButtonToggle;
+import com.amadornes.tbircme.gui.comp.GuiCheckbox;
+import com.amadornes.tbircme.gui.comp.GuiTextFieldCustomizable;
 import com.amadornes.tbircme.network.Server;
 import com.amadornes.tbircme.render.RenderHelper;
 import com.amadornes.tbircme.util.Config;
+import com.amadornes.tbircme.util.IChangeListener;
 
-public class GuiServerList extends GuiScreen implements IChangeListener {
+public class GuiServerList extends TBIRCMEGuiScreen implements IChangeListener {
 	private GuiScreen previousGui;
 	private GuiSlotServerList serverList;
 	private int selected = -1;
@@ -34,6 +37,7 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 	private GuiButton btnDelServer;
 	private GuiButton btnDone;
 	private GuiButtonToggle btnConnect;
+	private GuiButton btnChannels;
 
 	private GuiCheckbox cbDeath, cbGameJoin, cbGameLeave, cbIRCJoin, cbIRCLeave;
 
@@ -49,30 +53,22 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 		this.mainMenu = mainMenu;
 	}
 
-	@Override
-	public boolean doesGuiPauseGame() {
-		return Config.shouldConfigGuiPauseGame;
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
-		Keyboard.enableRepeatEvents(true);
-
-		for (Server server : servers) {
-			listWidth = Math
-					.max(listWidth, getFontRenderer().getStringWidth(server.getName()) + 10);
-			listWidth = Math.max(
-					listWidth,
-					getFontRenderer().getStringWidth(
-							server.getChannels().size()
-									+ " "
-									+ I18n.format(ModInfo.MODID + ".config.servers.channels.title",
-											new Object[0])) + 10);
+		super.initGui();
+		if (fName != null) {
+			this.buttonList.add(btnAddServer);
+			this.buttonList.add(btnDelServer);
+			this.buttonList.add(btnDone);
+			this.buttonList.add(btnConnect);
+			this.buttonList.add(btnChannels);
+			return;
 		}
-		listWidth = Math.min(listWidth, 150);
-		this.buttonList.add(btnDone = new GuiButton(6, this.width / 2 - 75, this.height - 38, I18n
-				.format("gui.done")));
+
+		listWidth = 150;
+		this.buttonList.add(btnDone = new GuiButtonCustom(6, this.width / 2 - 75, this.height - 38,
+				I18n.format("gui.done")));
 		btnAddServer = new GuiButton(20, 10, this.height - 60, this.listWidth, 20,
 				I18n.format(ModInfo.MODID + ".config.add"));
 		btnDelServer = new GuiButton(21, 10, this.height - 38, this.listWidth, 20,
@@ -83,25 +79,25 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 		this.serverList.registerScrollButtons(this.buttonList, 7, 8);
 
 		fName = (new GuiTextFieldCustomizable(this, fontRendererObj, 10 + listWidth + 10, 32, 200,
-				20));
+				20, 200));
 		fName.setPlaceholder(I18n.format(ModInfo.MODID + ".config.servers.placeholder.name",
 				new Object[0]));
 		fName.setEnabled(false);
 
 		fHost = (new GuiTextFieldCustomizable(this, fontRendererObj, 10 + listWidth + 10,
-				32 + 20 + 5, 200, 20));
+				32 + 20 + 5, 200, 20, 200));
 		fHost.setPlaceholder(I18n.format(ModInfo.MODID + ".config.servers.placeholder.host",
 				new Object[0]));
 		fName.setEnabled(false);
 
 		fUsername = (new GuiTextFieldCustomizable(this, fontRendererObj, 10 + listWidth + 10, 32
-				+ 20 + 5 + 20 + 5, 200, 20));
+				+ 20 + 5 + 20 + 5, 200, 20, 200));
 		fUsername.setPlaceholder(I18n
 				.format(ModInfo.MODID + ".config.servers.placeholder.username"));
 		fUsername.setEnabled(false);
 
 		fPassword = (new GuiTextFieldCustomizable(this, fontRendererObj, 10 + listWidth + 10, 32
-				+ 20 + 5 + 20 + 5 + 20 + 5, 200, 20));
+				+ 20 + 5 + 20 + 5 + 20 + 5, 200, 20, 200));
 		fPassword.setPlaceholder(I18n
 				.format(ModInfo.MODID + ".config.servers.placeholder.password"));
 		fPassword.setTooltip(I18n.format(ModInfo.MODID
@@ -129,8 +125,10 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 
 		int btnSize = 20;
 		int btnDist = 10;
-		buttonList.add(btnConnect = new GuiButtonToggle(10, width - btnSize - btnDist, btnDist,
-				btnSize, btnSize, ""));
+		this.buttonList.add(btnConnect = new GuiButtonToggle(10, width - btnSize - btnDist,
+				btnDist, btnSize, btnSize, ""));
+		this.buttonList.add(btnChannels = new GuiButton(10, width - btnSize - btnDist - btnSize
+				- 10, btnDist, btnSize, btnSize, ""));
 	}
 
 	private static Random rnd = new Random();
@@ -184,6 +182,10 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 					selectedServer.connect();
 				}
 			}
+			if (button == btnChannels) {
+				Minecraft.getMinecraft().displayGuiScreen(
+						new GuiChannelList(this, selectedServer, mainMenu));
+			}
 		}
 		super.actionPerformed(button);
 	}
@@ -201,15 +203,15 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 
 		btnAddServer.enabled = true;
 		btnDelServer.enabled = selectedServer != null;
-		int k;
 
-		for (k = 0; k < this.buttonList.size(); ++k) {
-			((GuiButton) this.buttonList.get(k)).drawButton(this.mc, mx, my);
-		}
+		btnDone.xPosition = listWidth + 10 + 5;
 
-		for (k = 0; k < this.labelList.size(); ++k) {
-			((GuiLabel) this.labelList.get(k)).func_146159_a(this.mc, mx, my);
-		}
+		int fWidth = this.width - (10 + listWidth + 10 + 10);
+		fName.setWidth(fWidth);
+		fHost.setWidth(fWidth);
+		fUsername.setWidth(fWidth);
+		fPassword.setWidth(fWidth);
+		((GuiButtonCustom) btnDone).setWidth(fWidth + 5);
 
 		if (selectedServer != null) {
 			fName.setEnabled(true);
@@ -222,6 +224,8 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 			cbDeath.setEnabled(true);
 			cbIRCJoin.setEnabled(true);
 			cbIRCLeave.setEnabled(true);
+
+			btnChannels.enabled = true;
 		} else {
 			fName.setEnabled(false);
 			fHost.setEnabled(false);
@@ -233,6 +237,15 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 			cbDeath.setEnabled(false);
 			cbIRCJoin.setEnabled(false);
 			cbIRCLeave.setEnabled(false);
+
+			btnChannels.enabled = false;
+		}
+
+		for (int k = 0; k < this.buttonList.size(); ++k) {
+			GuiButton b = ((GuiButton) this.buttonList.get(k));
+			if (b == btnConnect || b == btnChannels)
+				continue;
+			b.drawButton(this.mc, mx, my);
 		}
 
 		fName.drawTextBox();
@@ -272,6 +285,28 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 							btnConnect.getButtonWidth() - 4);
 				}
 			}
+		}
+
+		// Draw connect toggle button
+		{
+			if (!mainMenu && selectedServer != null) {
+				btnChannels.enabled = true;
+			} else {
+				btnChannels.enabled = false;
+			}
+
+			btnChannels.drawButton(mc, mx, my);
+
+			if (selectedServer != null) {
+				Minecraft.getMinecraft().renderEngine.bindTexture(new ResourceLocation(
+						ModInfo.MODID + ":others/channels.png"));
+				RenderHelper.drawTexturedRect(btnChannels.xPosition + 2, btnChannels.yPosition + 2,
+						0, 0, btnChannels.getButtonWidth() - 4, btnChannels.getButtonWidth() - 4);
+			}
+		}
+
+		// Tooltips
+		{
 
 			GL11.glEnable(GL11.GL_LIGHTING);
 			if (mx >= btnConnect.xPosition
@@ -283,6 +318,17 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 						: I18n.format(ModInfo.MODID + ".config.servers.connect")) : I18n
 						.format(ModInfo.MODID + ".config.servers.select") }), mx, my,
 						mc.fontRenderer);
+			}
+			GL11.glDisable(GL11.GL_LIGHTING);
+
+			GL11.glEnable(GL11.GL_LIGHTING);
+			if (mx >= btnChannels.xPosition
+					&& mx < btnChannels.xPosition + btnChannels.getButtonWidth()
+					&& my >= btnChannels.yPosition
+					&& my < btnChannels.yPosition + btnChannels.getButtonWidth()) {
+				drawHoveringText(
+						Arrays.asList(new String[] { I18n.format(ModInfo.MODID
+								+ ".config.servers.editChannels") }), mx, my, mc.fontRenderer);
 			}
 			GL11.glDisable(GL11.GL_LIGHTING);
 		}
@@ -308,8 +354,8 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 					selectedServer.getConnection().disconnect();
 				if (selectedServer.getConfigFile().exists())
 					selectedServer.getConfigFile().delete();
-				Minecraft.getMinecraft().displayGuiScreen(this);
 			}
+			Minecraft.getMinecraft().displayGuiScreen(this);
 		}
 	}
 
@@ -339,6 +385,7 @@ public class GuiServerList extends GuiScreen implements IChangeListener {
 		} else {
 			this.selectedServer = null;
 		}
+		onChange(null);
 	}
 
 	public boolean serverIndexSelected(int var1) {

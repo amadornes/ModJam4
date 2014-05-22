@@ -12,6 +12,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
 import com.amadornes.tbircme.ModInfo;
+import com.amadornes.tbircme.gui.comp.GuiButtonToggle;
 import com.amadornes.tbircme.render.RenderHelper;
 import com.amadornes.tbircme.util.Config;
 import com.amadornes.tbircme.util.ReflectionUtils;
@@ -205,7 +206,7 @@ public class GuiConfig extends GuiScreen {
 			btnPause.setState(Config.shouldConfigGuiPauseGame = !btnPause.getState());
 			Minecraft.getMinecraft().displayGuiScreen(new GuiConfig(mainMenu));
 		} else if (btn == btn1) {
-			Minecraft.getMinecraft().displayGuiScreen(new GuiClientConfig(this, mainMenu));
+			Minecraft.getMinecraft().displayGuiScreen(new GuiClientConfig(this));
 		} else if (btn == btn2) {
 
 		}

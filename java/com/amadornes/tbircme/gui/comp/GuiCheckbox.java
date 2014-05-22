@@ -1,9 +1,10 @@
-package com.amadornes.tbircme.gui;
+package com.amadornes.tbircme.gui.comp;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 
 import com.amadornes.tbircme.render.RenderHelper;
+import com.amadornes.tbircme.util.IChangeListener;
 
 public class GuiCheckbox extends Gui {
 	
