@@ -73,6 +73,7 @@ public class RenderHandler {
 			try {
 				renderEmotesForLine(l, l2, chat, chatLines, chatLines2, isOpen, ev);
 			} catch (Exception ex) {
+				ex.printStackTrace();
 			}
 			i++;
 		}
@@ -216,6 +217,7 @@ public class RenderHandler {
 						try {
 							renderEmote(w.getX(), id + w.getLine(), w.getEmote(), opacity, ev);
 						} catch (Exception ex) {
+							ex.printStackTrace();
 						}
 					}
 				}
@@ -242,7 +244,6 @@ public class RenderHandler {
 						emote.setTexture(tex);
 						emote.setImg(bi);
 					} catch (Exception ex) {
-
 					}
 				}
 
@@ -267,7 +268,8 @@ public class RenderHandler {
 				GL11.glScaled(mul, mul, 1);
 				RenderHelper.drawTexturedRect(0, 0, 0, 0, bi.getWidth(), bi.getHeight());
 				GL11.glScaled(1D / mul, 1D / mul, 1);
-			} catch (Exception e) {
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			}
 		}
 		GL11.glPopMatrix();

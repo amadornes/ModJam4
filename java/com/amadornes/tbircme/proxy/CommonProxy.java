@@ -5,6 +5,7 @@ import java.io.File;
 import com.amadornes.tbircme.ModInfo;
 import com.amadornes.tbircme.network.Server;
 import com.amadornes.tbircme.util.Config;
+import com.amadornes.tbircme.util.ConfigHandler;
 
 public class CommonProxy {
 
@@ -21,15 +22,16 @@ public class CommonProxy {
 		if (!exampleServerConfig.exists())
 			new Server(exampleServerConfig).loadConfig();
 
-		for (File f : serverConfigFolder.listFiles()) {
-			if (f.isFile() && f.getName().toLowerCase().endsWith(".cfg")) {
+		for (File f : serverConfigFolder.listFiles())
+			if (f.isFile() && f.getName().toLowerCase().endsWith(".cfg"))
 				if (!f.getName().equalsIgnoreCase("example.cfg")) {
 					Server s = new Server(f);
 					s.loadConfig();
 					Config.servers.add(s);
 				}
-			}
-		}
+		
+		ConfigHandler.setConfigFile(new File(configFile.getParentFile(), ModInfo.MODID + "/tbircme.cfg"));
+		ConfigHandler.loadMainConfig();
 	}
 
 	public void connectToServers() {

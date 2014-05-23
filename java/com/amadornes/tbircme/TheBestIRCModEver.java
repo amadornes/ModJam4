@@ -13,7 +13,6 @@ import com.amadornes.tbircme.emote.Emote;
 import com.amadornes.tbircme.emote.EmoteAPI;
 import com.amadornes.tbircme.network.IRCConnection;
 import com.amadornes.tbircme.proxy.CommonProxy;
-import com.amadornes.tbircme.util.Util;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
@@ -50,6 +49,7 @@ public class TheBestIRCModEver {
 
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent ev) {
+		System.out.println("Test!");
 		proxy.loadConfig(ev.getSuggestedConfigurationFile());
 	}
 
@@ -59,48 +59,15 @@ public class TheBestIRCModEver {
 		MinecraftForge.EVENT_BUS.register(handler);
 		FMLCommonHandler.instance().bus().register(handler);
 
-		System.out.println("IS MINECRAFT DEOBFUSCATED???? " + Util.isDeobfuscated());
-
 		proxy.registerRenders();
 	}
 
-	// @SuppressWarnings("unchecked")
 	@EventHandler
 	@SideOnly(Side.CLIENT)
 	public void postInit(FMLPostInitializationEvent ev) {
 		log.log(Level.INFO, "Loading emotes...");
 		EmoteAPI.init();
 		log.log(Level.INFO, "Emotes loaded!");
-		/*
-		 * new Thread(new Runnable() {
-		 * 
-		 * @Override public void run() { BiMap<ModContainer, IModGuiFactory>
-		 * factories = null; do { try { Thread.sleep(100); } catch
-		 * (InterruptedException e) { } factories = (BiMap<ModContainer,
-		 * IModGuiFactory>) ReflectionUtils.get( FMLClientHandler.instance(),
-		 * "guiFactories"); } while
-		 * (!Loader.instance().hasReachedState(LoaderState.AVAILABLE) ||
-		 * factories == null);
-		 * 
-		 * ModContainer c = null; for (ModContainer mc :
-		 * Loader.instance().getActiveModList()) if (mc.getModId() ==
-		 * ModInfo.MODID) { c = mc; break; } final IModGuiFactory f =
-		 * factories.get(c); factories.remove(c); factories.put(c, new
-		 * IModGuiFactory() {
-		 * 
-		 * @Override public Set<RuntimeOptionCategoryElement>
-		 * runtimeGuiCategories() { return f.runtimeGuiCategories(); }
-		 * 
-		 * @Override public Class<? extends GuiScreen> mainConfigGuiClass() {
-		 * return GuiConfig.class; }
-		 * 
-		 * @Override public void initialize(Minecraft minecraftInstance) {
-		 * f.initialize(minecraftInstance); }
-		 * 
-		 * @Override public RuntimeOptionGuiHandler getHandlerFor(
-		 * RuntimeOptionCategoryElement element) { return
-		 * f.getHandlerFor(element); } }); } }).start();
-		 */
 	}
 
 	@EventHandler

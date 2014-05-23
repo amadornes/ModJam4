@@ -169,7 +169,7 @@ public class GuiServerList extends TBIRCMEGuiScreen implements IChangeListener {
 					f = new File(TheBestIRCModEver.proxy.configFolder, rnd.nextInt(134132) + ".cfg");
 				} while (f.exists());
 				servers.add(new Server(I18n.format(ModInfo.MODID
-						+ ".config.servers.placeholder.name"), "", "", "", new ArrayList<String>(),
+						+ ".config.servers.placeholder.name"), "", "", "", "", new ArrayList<String>(),
 						new ArrayList<String>(), true, true, true, true, true, f));
 				selectServerIndex(servers.size() - 1);
 				return;

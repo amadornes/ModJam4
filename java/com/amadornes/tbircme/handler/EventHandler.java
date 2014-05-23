@@ -3,15 +3,23 @@ package com.amadornes.tbircme.handler;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
+import com.amadornes.tbircme.command.CommandTBIRCME;
+import com.amadornes.tbircme.gui.GuiConfig;
 import com.amadornes.tbircme.network.Server;
 import com.amadornes.tbircme.util.Config;
 
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent.ServerTickEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 
 public class EventHandler {
 
@@ -21,7 +29,7 @@ public class EventHandler {
 	public void onTick(ServerTickEvent ev) {
 		List<String> nPlayers = new ArrayList<String>();
 
-		if (ev.side.isServer()) {
+		if (ev.side.isServer() && !isLocal()) {
 			for (Object o : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
 				EntityPlayer p = (EntityPlayer) o;
 				nPlayers.add(p.getCommandSenderName());
@@ -55,6 +63,18 @@ public class EventHandler {
 		}
 	}
 
+	private boolean isLocal() {
+		if (FMLCommonHandler.instance().getEffectiveSide().isClient()) {
+			return isLocal(true);
+		}
+		return false;
+	}
+
+	@SideOnly(Side.CLIENT)
+	private boolean isLocal(boolean unused) {
+		return MinecraftServer.getServer() instanceof IntegratedServer;
+	}
+
 	@SubscribeEvent
 	public void onPlayerDie(LivingDeathEvent ev) {
 		if (ev.entity instanceof EntityPlayer) {
@@ -63,6 +83,13 @@ public class EventHandler {
 					if (s.shouldShowDeaths())
 						s.getConnection().onPlayerDie(ev.entity.getCommandSenderName(), ev);
 		}
+	}
+
+	@SubscribeEvent
+	@SideOnly(Side.CLIENT)
+	public void onCommand(CommandEvent ev) {
+		if (ev.command instanceof CommandTBIRCME)
+			Minecraft.getMinecraft().displayGuiScreen(new GuiConfig(false));
 	}
 
 }

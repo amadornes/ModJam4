@@ -15,6 +15,7 @@ import com.amadornes.tbircme.ModInfo;
 import com.amadornes.tbircme.gui.comp.GuiButtonToggle;
 import com.amadornes.tbircme.render.RenderHelper;
 import com.amadornes.tbircme.util.Config;
+import com.amadornes.tbircme.util.ConfigHandler;
 import com.amadornes.tbircme.util.ReflectionUtils;
 
 public class GuiConfig extends GuiScreen {
@@ -202,8 +203,10 @@ public class GuiConfig extends GuiScreen {
 	protected void actionPerformed(GuiButton btn) {
 		if (btn == btnEmotes) {
 			btnEmotes.setState(Config.emotesEnabled = !btnEmotes.getState());
+			ConfigHandler.saveMainConfig();
 		} else if (btn == btnPause) {
 			btnPause.setState(Config.shouldConfigGuiPauseGame = !btnPause.getState());
+			ConfigHandler.saveMainConfig();
 			Minecraft.getMinecraft().displayGuiScreen(new GuiConfig(mainMenu));
 		} else if (btn == btn1) {
 			Minecraft.getMinecraft().displayGuiScreen(new GuiClientConfig(this));

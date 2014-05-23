@@ -10,7 +10,7 @@ public class Server {
 
 	private String name;
 
-	private String host, serverpass, username;
+	private String host, serverpass, nickservpass, username;
 	private List<Channel> channels;
 	private List<String> commands;
 	private boolean showIngameJoins, showIngameParts, showDeaths, showIRCJoins, showIRCParts;
@@ -25,14 +25,15 @@ public class Server {
 		this.configFile = configFile;
 	}
 
-	public Server(String name, String host, String serverpass, String username,
-			List<String> channels, List<String> commands, boolean showIngameJoins,
+	public Server(String name, String host, String serverpass, String nickservpass,
+			String username, List<String> channels, List<String> commands, boolean showIngameJoins,
 			boolean showIngameParts, boolean showDeaths, boolean showIRCJoins,
 			boolean showIRCParts, File configFile) {
 		this.name = name;
 
 		this.host = host;
 		this.serverpass = serverpass;
+		this.nickservpass = nickservpass;
 		this.username = username;
 		this.commands = commands;
 
@@ -45,7 +46,7 @@ public class Server {
 		this.configFile = configFile;
 
 		this.channels = new ArrayList<Channel>();
-		for(String s : channels)
+		for (String s : channels)
 			this.channels.add(new Channel(this, s));
 	}
 
@@ -94,7 +95,8 @@ public class Server {
 
 			@Override
 			public void run() {
-				final IRCConnection irc = new IRCConnection(me, host, username, serverpass);
+				final IRCConnection irc = new IRCConnection(me, host, username, serverpass,
+						nickservpass);
 				me.irc = irc;
 				irc.connect();
 				irc.waitUntilConnected();
@@ -230,12 +232,17 @@ public class Server {
 					.get("login", "pass", "",
 							"The server's password (if using twitch, this is your oauth code).")
 					.getString().trim();
+			nickservpass = cfg
+					.get("login", "nickservpass", "",
+							"That username's nickserv pass (can leave empty).").getString().trim();
 			username = cfg
 					.get("login", "username", "TheBestIRCModEver",
 							"Username the bridge will use when connected to this server.")
 					.getString().trim();
-			String[] cmds = cfg.get("login", "commands", new String[] {},
-					"Commands to run after logging in (like Nickserv identify).").getStringList();
+			String[] cmds = cfg
+					.get("login", "commands", new String[] {},
+							"Commands to run after logging in (like Nickserv identify). Valid commands: msg")
+					.getStringList();
 			for (String s : cmds)
 				commands.add(s.trim());
 		}
@@ -261,11 +268,11 @@ public class Server {
 		this.host = host.trim();
 		this.serverpass = serverpass.trim().length() == 0 ? null : serverpass.trim();
 		this.username = username.trim();
-		
+
 		this.channels = new ArrayList<Channel>();
-		for(String s : channels)
+		for (String s : channels)
 			this.channels.add(new Channel(this, s));
-		
+
 		this.commands = commands;
 		this.showIngameJoins = showIngameJoins;
 		this.showIngameParts = showIngameParts;
@@ -306,21 +313,24 @@ public class Server {
 			cfg.get("login", "pass", serverpass,
 					"The server's password (if using twitch, this is your oauth code).").set(
 					serverpass == null ? "" : serverpass);
+			cfg.get("login", "nickservpass", "", "That username's nickserv pass (can leave empty).");
 			cfg.get("login", "username", username,
 					"Username the bridge will use when connected to this server.").set(username);
 			String[] cmds = commands.toArray(new String[] {});
 			cfg.get("login", "commands", cmds,
-					"Commands to run after logging in (like Nickserv identify).").set(cmds);
+					"Commands to run after logging in (like Nickserv identify). Valid commands: msg")
+					.set(cmds);
 		}
 		// Channels section
 		{
 			String[] ch = new String[0];
-			try{
+			try {
 				ArrayList<String> channels = new ArrayList<String>();
-				for(Channel c : this.channels)
+				for (Channel c : this.channels)
 					channels.add(c.getChannel());
 				ch = channels.toArray(new String[] {});
-			}catch(Exception ex){}
+			} catch (Exception ex) {
+			}
 			cfg.get("channels", "channels", ch,
 					"Channels that the bridge will work with. One on each line.").set(ch);
 		}
@@ -335,7 +345,7 @@ public class Server {
 
 		cfg.save();
 	}
-	
+
 	@Override
 	public String toString() {
 		return getName();

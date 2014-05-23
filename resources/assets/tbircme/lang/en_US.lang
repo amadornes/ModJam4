@@ -30,10 +30,10 @@ tbircme.config.servers.placeholder.username=Username
 tbircme.config.servers.placeholder.password=Server password (not NickServ!)
 tbircme.config.servers.placeholder.password.tooltip=This is the server password. You can use this to login with twitch (oauth code), for example.
 
-tbircme.config.server.title=Server Settings
+tbircme.config.server.title=Server Settings [WIP]
 
 tbircme.config.channels.title=Channels
-tbircme.config.channels.customize=Customize
+tbircme.config.channels.customize=Customize [WIP]
 tbircme.config.channels.placeholder.name=Channel
 tbircme.config.channels.placeholder.server=Server
 

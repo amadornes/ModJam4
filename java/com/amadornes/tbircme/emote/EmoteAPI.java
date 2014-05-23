@@ -1,8 +1,9 @@
 package com.amadornes.tbircme.emote;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Map.Entry;
-
-import org.apache.commons.io.IOUtils;
 
 import com.amadornes.tbircme.ModInfo;
 import com.amadornes.tbircme.TheBestIRCModEver;
@@ -21,8 +22,16 @@ public class EmoteAPI {
 		try {
 			// URL u = new URL("http://www.twitchemotes.com/global.json");
 
-			JsonObject emotes = (JsonObject) new JsonParser().parse(IOUtils.toString(Class.class
-					.getResourceAsStream("/assets/" + ModInfo.MODID + "/emotes/global.json")));
+			InputStream is = EmoteAPI.class.getResourceAsStream("/assets/" + ModInfo.MODID
+					+ "/emotes/global.json");
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+			String s = "";
+			String l = null;
+			while ((l = br.readLine()) != null)
+				s += l;
+			br.close();
+			is.close();
+			JsonObject emotes = (JsonObject) new JsonParser().parse(s);
 			// Hardcode them to a file because they can't be loaded from the
 			// website
 
@@ -40,8 +49,16 @@ public class EmoteAPI {
 		try {
 			// URL u = new URL("http://www.twitchemotes.com/subscriber.json");
 
-			JsonObject channels = (JsonObject) new JsonParser().parse(IOUtils.toString(Class.class
-					.getResourceAsStream("/assets/" + ModInfo.MODID + "/emotes/subscriber.json")));
+			InputStream is = EmoteAPI.class.getResourceAsStream("/assets/" + ModInfo.MODID
+					+ "/emotes/subscriber.json");
+			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+			String s = "";
+			String l = null;
+			while ((l = br.readLine()) != null)
+				s += l;
+			br.close();
+			is.close();
+			JsonObject channels = (JsonObject) new JsonParser().parse(s);
 			// Hardcode them to a file because they can't be loaded from the
 			// website
 

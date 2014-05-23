@@ -22,11 +22,13 @@ import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
 import com.amadornes.tbircme.TheBestIRCModEver;
+import com.amadornes.tbircme.compat.bukkit.BukkitStuff;
 import com.amadornes.tbircme.exception.REAlreadyConnected;
 import com.amadornes.tbircme.exception.REErrorConnecting;
 import com.amadornes.tbircme.exception.RENullHost;
 import com.amadornes.tbircme.permissions.User;
 import com.amadornes.tbircme.util.Config;
+import com.amadornes.tbircme.util.Util;
 
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 
@@ -36,6 +38,7 @@ public class IRCConnection {
 
 	private String host = null;
 	private String password = null;
+	private String nickservPass = null;
 
 	private Socket socket = null;
 	private BufferedReader r = null;
@@ -49,20 +52,25 @@ public class IRCConnection {
 
 	private IRCCommandSender commandSender;
 
-	public IRCConnection(Server server, final String host, String nick, String password) {
+	public IRCConnection(Server server, final String host, String nick, String password,
+			String nickservPass) {
 		if (host == null)
 			throw new RENullHost();
 		this.server = server;
 		this.host = host;
 		this.nick = nick;
 		this.password = password;
-		MinecraftForge.EVENT_BUS.register(this);
+		this.nickservPass = nickservPass;
 
 		commandSender = new IRCCommandSender(this, host);
-	}
 
-	public IRCConnection(Server server, final String host, String nick) {
-		this(server, host, nick, null);
+		// Subscribe to chat events
+		if (Util.isMCPCInstalled()) {
+			BukkitStuff.waitUntilEnabled();
+			BukkitStuff.registerChatEventsForConnection(this);
+		} else {
+			MinecraftForge.EVENT_BUS.register(this);
+		}
 	}
 
 	public Server getServer() {
@@ -106,6 +114,9 @@ public class IRCConnection {
 					}
 				} while (tryAgain && id < 100);
 				TheBestIRCModEver.log.log(Level.INFO, "Connected as: " + nick + (id > 0 ? id : ""));
+				
+				if(nickservPass != null)
+					sendRaw("PRIVMSG NickServ :identify " + nickservPass);
 
 				// Start listening for pings, messages, etc...
 				startConnectionTicker();
@@ -410,8 +421,12 @@ public class IRCConnection {
 
 	@SubscribeEvent
 	public void onIngameChat(ServerChatEvent ev) {
+		onIngameChat(ev.username, ev.message);
+	}
+
+	public void onIngameChat(String username, String message) {
 		for (Channel c : getChannels())
-			chat(c.getChannel(), c.formatChatMessage(ev.username, ev.message));
+			chat(c.getChannel(), c.formatChatMessage(username, message));
 	}
 
 	@SubscribeEvent
