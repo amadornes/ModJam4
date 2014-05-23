@@ -125,7 +125,7 @@ public class ChatComponentEmote implements IChatComponent {
 		String str = comp.getFormattedText();
 		if (formatted == null || !formattedOriginal.equals(str)) {
 			formattedOriginal = str;
-
+			
 			String s = comp.getFormattedText();
 			for (Emote e : TheBestIRCModEver.emotes) {
 				s = s.replace(" " + e.getEmote() + " ", getTextForWidth(14) + " ");
