@@ -407,7 +407,7 @@ public class IRCConnection {
 
 		String msg = c.formatIRCMessage(sender, message);
 		if (message.trim().startsWith("ACTION ") && !message.startsWith("ACTION ")) {
-			msg = c.formatIRCEmote(sender, message);
+			msg = c.formatIRCEmote(sender, message.trim().substring("ACTION ".length()));
 		}
 
 		for (Object o : MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
