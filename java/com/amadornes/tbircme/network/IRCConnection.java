@@ -114,9 +114,6 @@ public class IRCConnection {
 					}
 				} while (tryAgain && id < 100);
 				TheBestIRCModEver.log.log(Level.INFO, "Connected as: " + nick + (id > 0 ? id : ""));
-				
-				if(nickservPass != null)
-					sendRaw("PRIVMSG NickServ :identify " + nickservPass);
 
 				// Start listening for pings, messages, etc...
 				startConnectionTicker();

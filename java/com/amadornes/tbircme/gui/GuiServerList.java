@@ -41,7 +41,7 @@ public class GuiServerList extends TBIRCMEGuiScreen implements IChangeListener {
 
 	private GuiCheckbox cbDeath, cbGameJoin, cbGameLeave, cbIRCJoin, cbIRCLeave;
 
-	private GuiTextFieldCustomizable fName, fHost, fUsername, fPassword;
+	private GuiTextFieldCustomizable fName, fHost, fUsername, fPassword, fPasswordNickserv;
 
 	private boolean mainMenu = false;
 
@@ -97,13 +97,20 @@ public class GuiServerList extends TBIRCMEGuiScreen implements IChangeListener {
 		fUsername.setEnabled(false);
 
 		fPassword = (new GuiTextFieldCustomizable(this, fontRendererObj, 10 + listWidth + 10, 32
-				+ 20 + 5 + 20 + 5 + 20 + 5, 200, 20, 200));
+				+ 20 + 5 + 20 + 5 + 20 + 5, 98, 20, 98));
 		fPassword.setPlaceholder(I18n
 				.format(ModInfo.MODID + ".config.servers.placeholder.password"));
 		fPassword.setTooltip(I18n.format(ModInfo.MODID
 				+ ".config.servers.placeholder.password.tooltip"));
 		fPassword.setPassword(true);
 		fPassword.setEnabled(false);
+
+		fPasswordNickserv = (new GuiTextFieldCustomizable(this, fontRendererObj,
+				10 + listWidth + 10 + 103, 32 + 20 + 5 + 20 + 5 + 20 + 5, 97, 20, 97));
+		fPasswordNickserv.setPlaceholder(I18n.format(ModInfo.MODID
+				+ ".config.servers.placeholder.nickservpassword"));
+		fPasswordNickserv.setPassword(true);
+		fPasswordNickserv.setEnabled(false);
 
 		int cbSize = 12;
 
@@ -139,18 +146,42 @@ public class GuiServerList extends TBIRCMEGuiScreen implements IChangeListener {
 			if (button == btnDone) {
 				if (hasChanged) {
 					if (selectedServer != null) {
+						boolean majorChanges = false;
 						selectedServer.saveConfig();
 						selectedServer.setName(fName.getText());
 						selectedServer.setHost(fHost.getText());
+						majorChanges = majorChanges
+								|| !selectedServer.getUsername().equalsIgnoreCase(
+										fUsername.getText());
 						selectedServer.setUsername(fUsername.getText());
-						selectedServer.setServerpass(fPassword.getText() == "" ? null : fPassword
+						try {
+							majorChanges = majorChanges
+									|| !selectedServer.getServerPass().equals(fPassword.getText());
+						} catch (Exception ex) {
+							majorChanges = true;
+						}
+						selectedServer.setServerPass(fPassword.getText() == "" ? null : fPassword
 								.getText());
+						try {
+							majorChanges = majorChanges
+									|| !selectedServer.getNickservPass().equals(
+											fPasswordNickserv.getText());
+						} catch (Exception ex) {
+							majorChanges = true;
+						}
+						selectedServer.setNickservPass(fPasswordNickserv.getText() == "" ? null
+								: fPasswordNickserv.getText());
 
 						selectedServer.setShowIngameJoins(cbGameJoin.getState());
 						selectedServer.setShowIngameParts(cbGameLeave.getState());
 						selectedServer.setShowDeaths(cbDeath.getState());
 						selectedServer.setShowIRCJoins(cbIRCJoin.getState());
 						selectedServer.setShowIRCParts(cbIRCLeave.getState());
+
+						if (majorChanges && selectedServer.isConnected()) {
+							selectedServer.disconnect();
+							selectedServer.connect();
+						}
 					}
 					onChange(null);
 					return;
@@ -166,10 +197,10 @@ public class GuiServerList extends TBIRCMEGuiScreen implements IChangeListener {
 			if (button == btnAddServer) {
 				File f = null;
 				do {
-					f = new File(TheBestIRCModEver.proxy.configFolder, rnd.nextInt(134132) + ".cfg");
+					f = new File(TheBestIRCModEver.proxy.configFolder, rnd.nextInt(999999) + ".cfg");
 				} while (f.exists());
 				servers.add(new Server(I18n.format(ModInfo.MODID
-						+ ".config.servers.placeholder.name"), "", "", "", "", new ArrayList<String>(),
+						+ ".config.servers.placeholder.name"), "", "", "", "",
 						new ArrayList<String>(), true, true, true, true, true, f));
 				selectServerIndex(servers.size() - 1);
 				return;
@@ -218,6 +249,7 @@ public class GuiServerList extends TBIRCMEGuiScreen implements IChangeListener {
 			fHost.setEnabled(true);
 			fUsername.setEnabled(true);
 			fPassword.setEnabled(true);
+			fPasswordNickserv.setEnabled(true);
 
 			cbGameJoin.setEnabled(true);
 			cbGameLeave.setEnabled(true);
@@ -231,6 +263,7 @@ public class GuiServerList extends TBIRCMEGuiScreen implements IChangeListener {
 			fHost.setEnabled(false);
 			fUsername.setEnabled(false);
 			fPassword.setEnabled(false);
+			fPasswordNickserv.setEnabled(false);
 
 			cbGameJoin.setEnabled(false);
 			cbGameLeave.setEnabled(false);
@@ -252,6 +285,7 @@ public class GuiServerList extends TBIRCMEGuiScreen implements IChangeListener {
 		fHost.drawTextBox();
 		fUsername.drawTextBox();
 		fPassword.drawTextBox();
+		fPasswordNickserv.drawTextBox();
 
 		cbGameJoin.drawCheckbox();
 		cbGameLeave.drawCheckbox();
@@ -337,6 +371,7 @@ public class GuiServerList extends TBIRCMEGuiScreen implements IChangeListener {
 		fHost.renderTooltip(mx, my);
 		fUsername.renderTooltip(mx, my);
 		fPassword.renderTooltip(mx, my);
+		fPasswordNickserv.renderTooltip(mx, my);
 
 		cbGameJoin.renderTooltip(mx, my);
 		cbGameLeave.renderTooltip(mx, my);
@@ -375,7 +410,8 @@ public class GuiServerList extends TBIRCMEGuiScreen implements IChangeListener {
 			fName.setText(selectedServer.getName());
 			fHost.setText(selectedServer.getHost());
 			fUsername.setText(selectedServer.getUsername());
-			fPassword.setText(selectedServer.getServerpass());
+			fPassword.setText(selectedServer.getServerPass());
+			fPasswordNickserv.setText(selectedServer.getNickservPass());
 
 			cbGameJoin.setState(selectedServer.shouldShowIngameJoins());
 			cbGameLeave.setState(selectedServer.shouldShowIngameParts());
@@ -404,6 +440,8 @@ public class GuiServerList extends TBIRCMEGuiScreen implements IChangeListener {
 			fUsername.mouseClicked(par1, par2, par3);
 		if (fPassword.isEnabled())
 			fPassword.mouseClicked(par1, par2, par3);
+		if (fPasswordNickserv.isEnabled())
+			fPasswordNickserv.mouseClicked(par1, par2, par3);
 
 		if (cbGameJoin.isEnabled())
 			cbGameJoin.mouseClick(par1, par2, par3);
@@ -429,6 +467,8 @@ public class GuiServerList extends TBIRCMEGuiScreen implements IChangeListener {
 			fUsername.textboxKeyTyped(par1, par2);
 		if (fPassword.isEnabled())
 			fPassword.textboxKeyTyped(par1, par2);
+		if (fPasswordNickserv.isEnabled())
+			fPasswordNickserv.textboxKeyTyped(par1, par2);
 	}
 
 	@Override

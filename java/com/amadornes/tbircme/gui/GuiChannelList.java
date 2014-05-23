@@ -143,9 +143,11 @@ public class GuiChannelList extends TBIRCMEGuiScreen implements IChangeListener 
 				channels.add(new Channel(server, ""));
 				selectChannelIndex(channels.size() - 1);
 				onChange(ddServer);
+				return;
 			}
 			if (button == btnDelChannel) {
-
+				this.mc.displayGuiScreen(new GuiConfirmationDeleteChannel(this));
+				return;
 			}
 		}
 		super.actionPerformed(button);
@@ -195,13 +197,13 @@ public class GuiChannelList extends TBIRCMEGuiScreen implements IChangeListener 
 
 		if (par2 == 0) {
 			if (par1) {
-				Config.servers.remove(selectedChannel);
-				/*
-				 * if (selectedChannel.isConnected())
-				 * selectedChannel.getConnection().disconnect(); if
-				 * (selectedChannel.getConfigFile().exists())
-				 * selectedChannel.getConfigFile().delete();
-				 */
+				try{
+					Server sv = selectedChannel.getServer();
+					if(sv.isConnected())
+						sv.getConnection().part(selectedChannel.getChannel());
+					sv.getChannels().remove(selectedChannel);
+					sv.saveConfig();
+				}catch(Exception ex){}
 				Minecraft.getMinecraft().displayGuiScreen(this);
 			}
 		}

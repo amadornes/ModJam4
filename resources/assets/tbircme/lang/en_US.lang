@@ -27,7 +27,8 @@ tbircme.config.servers.checkbox.showIRCParts=Show IRC parts
 tbircme.config.servers.placeholder.name=Server name
 tbircme.config.servers.placeholder.host=Server host (i.e. irc.esper.net)
 tbircme.config.servers.placeholder.username=Username
-tbircme.config.servers.placeholder.password=Server password (not NickServ!)
+tbircme.config.servers.placeholder.password=Server pass
+tbircme.config.servers.placeholder.nickservpassword=NickServ pass
 tbircme.config.servers.placeholder.password.tooltip=This is the server password. You can use this to login with twitch (oauth code), for example.
 
 tbircme.config.server.title=Server Settings [WIP]

@@ -12,7 +12,6 @@ public class Server {
 
 	private String host, serverpass, nickservpass, username;
 	private List<Channel> channels;
-	private List<String> commands;
 	private boolean showIngameJoins, showIngameParts, showDeaths, showIRCJoins, showIRCParts;
 	private List<String> cmdVoice = new ArrayList<String>(), cmds = new ArrayList<String>();
 	private File configFile;
@@ -26,7 +25,7 @@ public class Server {
 	}
 
 	public Server(String name, String host, String serverpass, String nickservpass,
-			String username, List<String> channels, List<String> commands, boolean showIngameJoins,
+			String username, List<String> channels, boolean showIngameJoins,
 			boolean showIngameParts, boolean showDeaths, boolean showIRCJoins,
 			boolean showIRCParts, File configFile) {
 		this.name = name;
@@ -35,7 +34,6 @@ public class Server {
 		this.serverpass = serverpass;
 		this.nickservpass = nickservpass;
 		this.username = username;
-		this.commands = commands;
 
 		this.showIngameJoins = showIngameJoins;
 		this.showIngameParts = showIngameParts;
@@ -66,12 +64,12 @@ public class Server {
 		return channels;
 	}
 
-	public List<String> getStartupCommands() {
-		return commands;
-	}
-
-	public String getServerpass() {
+	public String getServerPass() {
 		return serverpass;
+	}
+	
+	public String getNickservPass() {
+		return nickservpass;
 	}
 
 	public boolean isConnected() {
@@ -100,16 +98,16 @@ public class Server {
 				me.irc = irc;
 				irc.connect();
 				irc.waitUntilConnected();
-				for (String c : commands) {
-					irc.cmd(c);
-				}
 				for (Channel c : channels) {
 					irc.join(c);
+				}
+				if (nickservpass != null) {
+					irc.sendRaw("PRIVMSG NickServ :identify " + nickservpass);
 				}
 				Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 					@Override
 					public void run() {
-						irc.disconnect();
+						disconnect();
 					}
 				}));
 				connecting = false;
@@ -182,8 +180,12 @@ public class Server {
 		this.name = name;
 	}
 
-	public void setServerpass(String serverpass) {
+	public void setServerPass(String serverpass) {
 		this.serverpass = serverpass;
+	}
+	
+	public void setNickservPass(String nickservpass) {
+		this.nickservpass = nickservpass;
 	}
 
 	public void setShowDeaths(boolean showDeaths) {
@@ -267,13 +269,13 @@ public class Server {
 		this.name = name.trim();
 		this.host = host.trim();
 		this.serverpass = serverpass.trim().length() == 0 ? null : serverpass.trim();
+		this.nickservpass = nickservpass.trim().length() == 0 ? null : nickservpass.trim();
 		this.username = username.trim();
 
 		this.channels = new ArrayList<Channel>();
 		for (String s : channels)
 			this.channels.add(new Channel(this, s));
 
-		this.commands = commands;
 		this.showIngameJoins = showIngameJoins;
 		this.showIngameParts = showIngameParts;
 		this.showDeaths = showDeaths;
@@ -313,13 +315,9 @@ public class Server {
 			cfg.get("login", "pass", serverpass,
 					"The server's password (if using twitch, this is your oauth code).").set(
 					serverpass == null ? "" : serverpass);
-			cfg.get("login", "nickservpass", "", "That username's nickserv pass (can leave empty).");
+			cfg.get("login", "nickservpass", "", "That username's nickserv pass (can leave empty).").set(nickservpass == null ? "" : nickservpass);
 			cfg.get("login", "username", username,
 					"Username the bridge will use when connected to this server.").set(username);
-			String[] cmds = commands.toArray(new String[] {});
-			cfg.get("login", "commands", cmds,
-					"Commands to run after logging in (like Nickserv identify). Valid commands: msg")
-					.set(cmds);
 		}
 		// Channels section
 		{
