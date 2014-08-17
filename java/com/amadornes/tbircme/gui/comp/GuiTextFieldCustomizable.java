@@ -8,7 +8,7 @@ import net.minecraft.util.ChatAllowedCharacters;
 
 import org.lwjgl.opengl.GL11;
 
-import com.amadornes.lib.render.RenderHelper;
+import com.amadornes.tbircme.client.render.RenderHelper;
 import com.amadornes.tbircme.util.IChangeListener;
 
 import cpw.mods.fml.relauncher.Side;

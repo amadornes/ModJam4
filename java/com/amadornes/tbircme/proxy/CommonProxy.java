@@ -13,6 +13,8 @@ import com.amadornes.tbircme.irc.ConnectionManager;
 import com.amadornes.tbircme.irc.IRCEventHandler;
 import com.amadornes.tbircme.ref.ModInfo;
 
+import cpw.mods.fml.common.FMLCommonHandler;
+
 public class CommonProxy {
     
     public void registerRenders() {
@@ -38,7 +40,9 @@ public class CommonProxy {
     
     public void setupIRCEvents() {
     
-        MinecraftForge.EVENT_BUS.register(new IRCEventHandler());
+        IRCEventHandler handler = new IRCEventHandler();
+        MinecraftForge.EVENT_BUS.register(handler);
+        FMLCommonHandler.instance().bus().register(handler);
     }
     
     public void connectToIRC(final MinecraftServer server) {

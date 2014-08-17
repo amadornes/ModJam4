@@ -7,6 +7,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import com.amadornes.tbircme.gui.GuiTBIRCME;
 import com.amadornes.tbircme.network.Packet;
 
+import cpw.mods.fml.relauncher.Side;
+
+import cpw.mods.fml.relauncher.SideOnly;
+
 public class PacketGUI extends Packet<PacketGUI> {
     
     @Override
@@ -20,6 +24,7 @@ public class PacketGUI extends Packet<PacketGUI> {
     }
     
     @Override
+    @SideOnly(Side.CLIENT)
     public void handleClientSide(PacketGUI message, EntityPlayer player) {
     
         Minecraft.getMinecraft().displayGuiScreen(new GuiTBIRCME());

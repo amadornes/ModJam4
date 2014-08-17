@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EnumChatFormatting;
 
 import com.amadornes.tbircme.api.ChannelConfig;
 import com.amadornes.tbircme.api.IIRCChannel;
 import com.amadornes.tbircme.api.IIRCConnection;
 import com.amadornes.tbircme.api.IIRCUser;
 import com.amadornes.tbircme.api.IRCMode;
+import com.amadornes.tbircme.util.Utils;
 
 public class IRCChannel implements IIRCChannel {
     
@@ -182,25 +184,25 @@ public class IRCChannel implements IIRCChannel {
     @Override
     public void onPlayerChat(EntityPlayer player, String message) {
     
-        sendMessage("<" + player.getDisplayName() + "> " + message);
+        sendMessage("<" + Utils.getUsernameForIRC(player) + "> " + message);
     }
     
     @Override
     public void onPlayerEmote(EntityPlayer player, String emote) {
     
-        sendMessage(" * " + player.getDisplayName() + " " + emote);
+        sendMessage(" * " + EnumChatFormatting.BOLD + Utils.getUsernameForIRC(player) + EnumChatFormatting.RESET + " " + emote);
     }
     
     @Override
     public void onPlayerJoin(EntityPlayer player) {
     
-        sendMessage(player.getDisplayName() + " joined the game.");
+        sendMessage(" * " + Utils.getUsernameForIRC(player) + " has joined the game.");
     }
     
     @Override
     public void onPlayerLeave(EntityPlayer player) {
     
-        sendMessage(player.getDisplayName() + " left the game.");
+        sendMessage(" * " + Utils.getUsernameForIRC(player) + " has left the game.");
     }
     
 }

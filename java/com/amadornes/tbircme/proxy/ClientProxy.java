@@ -9,6 +9,9 @@ import com.amadornes.tbircme.client.render.RenderHandler;
 import com.amadornes.tbircme.command.CommandTBIRCME;
 import com.amadornes.tbircme.emote.EmoteApi;
 import com.amadornes.tbircme.exception.IRCException;
+import com.amadornes.tbircme.irc.IRCEventHandlerClient;
+
+import cpw.mods.fml.common.FMLCommonHandler;
 
 public class ClientProxy extends CommonProxy {
     
@@ -36,6 +39,16 @@ public class ClientProxy extends CommonProxy {
     public void registerCommands() {
     
         ClientCommandHandler.instance.registerCommand(new CommandTBIRCME());
+    }
+    
+    @Override
+    public void setupIRCEvents() {
+    
+        super.setupIRCEvents();
+        
+        IRCEventHandlerClient handler = new IRCEventHandlerClient();
+        MinecraftForge.EVENT_BUS.register(handler);
+        FMLCommonHandler.instance().bus().register(handler);
     }
     
     @Override

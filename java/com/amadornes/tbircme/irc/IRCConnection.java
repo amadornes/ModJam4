@@ -15,6 +15,7 @@ import com.amadornes.tbircme.api.IIRCChannel;
 import com.amadornes.tbircme.api.IIRCConnection;
 import com.amadornes.tbircme.exception.IRCException;
 import com.amadornes.tbircme.exception.IRCExceptionLevel;
+import com.amadornes.tbircme.util.Utils;
 
 public class IRCConnection implements IIRCConnection {
     
@@ -199,7 +200,7 @@ public class IRCConnection implements IIRCConnection {
     @Override
     public void sendMessage(String channel, String message) {
     
-        bot.sendMessage("#" + channel, message);
+        bot.sendMessage("#" + channel, Utils.formatForIRC(message));
     }
     
     @Override
