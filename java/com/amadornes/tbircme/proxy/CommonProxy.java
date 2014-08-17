@@ -1,50 +1,82 @@
 package com.amadornes.tbircme.proxy;
 
-import java.io.File;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ChatComponentText;
+import net.minecraftforge.common.MinecraftForge;
 
-import com.amadornes.tbircme.ModInfo;
-import com.amadornes.tbircme.network.Server;
-import com.amadornes.tbircme.util.Config;
-import com.amadornes.tbircme.util.ConfigHandler;
+import com.amadornes.tbircme.api.AConnectionManager;
+import com.amadornes.tbircme.api.IIRCConnection;
+import com.amadornes.tbircme.exception.IRCException;
+import com.amadornes.tbircme.irc.ConnectionManager;
+import com.amadornes.tbircme.irc.IRCEventHandler;
+import com.amadornes.tbircme.ref.ModInfo;
 
 public class CommonProxy {
-
-	public File configFolder = null;
-
-	public void loadConfig(File configFile) {
-		File serverConfigFolder = new File(configFile.getParentFile(), ModInfo.MODID + "/servers/");
-		if (!serverConfigFolder.exists())
-			serverConfigFolder.mkdirs();
-
-		configFolder = serverConfigFolder.getParentFile();
-
-		File exampleServerConfig = new File(serverConfigFolder, "example.cfg");
-		if (!exampleServerConfig.exists())
-			new Server(exampleServerConfig).loadConfig();
-
-		for (File f : serverConfigFolder.listFiles())
-			if (f.isFile() && f.getName().toLowerCase().endsWith(".cfg"))
-				if (!f.getName().equalsIgnoreCase("example.cfg")) {
-					Server s = new Server(f);
-					s.loadConfig();
-					Config.servers.add(s);
-				}
-		
-		ConfigHandler.setConfigFile(new File(configFile.getParentFile(), ModInfo.MODID + "/tbircme.cfg"));
-		ConfigHandler.loadMainConfig();
-	}
-
-	public void connectToServers() {
-		for (Server s : Config.servers)
-			s.connect();
-	}
-
-	public void disconnectFromServers() {
-		for (Server s : Config.servers)
-			s.disconnect();
-	}
-
-	public void registerRenders() {
-	}
-
+    
+    public void registerRenders() {
+    
+        // Clientside-only
+    }
+    
+    public void loadEmotes() {
+    
+        // Clientside-only
+    }
+    
+    public void exception(IRCException exception) {
+    
+        exception.printStackTrace();
+    }
+    
+    public void loadConnections() {
+    
+        ConnectionManager.init();
+        AConnectionManager.inst().loadAll();
+    }
+    
+    public void setupIRCEvents() {
+    
+        MinecraftForge.EVENT_BUS.register(new IRCEventHandler());
+    }
+    
+    public void connectToIRC(final MinecraftServer server) {
+    
+        for (final IIRCConnection con : AConnectionManager.inst().getConnections()) {
+            new Thread(new Runnable() {
+                
+                @Override
+                public void run() {
+                
+                    for (Object o : server.getConfigurationManager().playerEntityList)
+                        ((EntityPlayer) o).addChatMessage(new ChatComponentText(I18n.format(ModInfo.MODID + ".messages.connecting.server",
+                                con.getName())));
+                    
+                    con.connect();
+                    
+                    for (Object o : server.getConfigurationManager().playerEntityList)
+                        ((EntityPlayer) o).addChatMessage(new ChatComponentText(I18n.format(ModInfo.MODID + ".messages.connected.server",
+                                con.getName())));
+                }
+            }, "TBIRCME Connection: " + con.getId()).start();
+        }
+    }
+    
+    public void disconnectFromIRC() {
+    
+        for (IIRCConnection con : AConnectionManager.inst().getConnections()) {
+            con.disconnect();
+        }
+    }
+    
+    public void registerCommands() {
+    
+    }
+    
+    public EntityPlayer getPlayer() {
+    
+        return null;
+    }
+    
 }

@@ -1,44 +1,21 @@
 tbircme.name=The Best IRC Mod Ever
 
-tbircme.config.title=Settings
-tbircme.config.client.title=Client Settings
-tbircme.config.client.emotes.enable=Enable Emotes
-tbircme.config.client.emotes.disable=Disable Emotes
+tbircme.gui.title=Config
 
-tbircme.config.servers.title=Servers
-tbircme.config.servers.channels=channels
-tbircme.config.servers.connected=Connected
-tbircme.config.servers.notconnected=NOT CONNECTED
+tbircme.gui.client.title=Client config
+tbircme.gui.server.title=Server config
 
-tbircme.config.servers.connect=Connect
-tbircme.config.servers.disconnect=Disconnect
-tbircme.config.servers.select=Select/create a server
-tbircme.config.servers.editChannels=Edit channels
+tbircme.gui.servers.title=Servers
+tbircme.gui.channels.title=Channels
 
-tbircme.config.save=Save
-tbircme.config.cancel=Cancel
+tbircme.gui.buttons.add=Add
+tbircme.gui.buttons.remove=Remove
+tbircme.gui.buttons.save=Save
+tbircme.gui.buttons.discard=Discard
 
-tbircme.config.servers.checkbox.showIngameJoins=Show game joins
-tbircme.config.servers.checkbox.showIngameParts=Show game parts
-tbircme.config.servers.checkbox.showDeaths=Show deaths
-tbircme.config.servers.checkbox.showIRCJoins=Show IRC joins
-tbircme.config.servers.checkbox.showIRCParts=Show IRC parts
+tbircme.messages.connecting.server=Connecting to %s
+tbircme.messages.connected.server=Connected to %s!
 
-tbircme.config.servers.placeholder.name=Server name
-tbircme.config.servers.placeholder.host=Server host (i.e. irc.esper.net)
-tbircme.config.servers.placeholder.username=Username
-tbircme.config.servers.placeholder.password=Server pass
-tbircme.config.servers.placeholder.nickservpassword=NickServ pass
-tbircme.config.servers.placeholder.password.tooltip=This is the server password. You can use this to login with twitch (oauth code), for example.
-
-tbircme.config.server.title=Server Settings [WIP]
-
-tbircme.config.channels.title=Channels
-tbircme.config.channels.customize=Customize [WIP]
-tbircme.config.channels.placeholder.name=Channel
-tbircme.config.channels.placeholder.server=Server
-
-tbircme.config.add=Add
-tbircme.config.remove=Remove
-tbircme.config.pause.enable=Enable pausing game
-tbircme.config.pause.disable=Disable pausing game
+tbircme.status.connected=Connected
+tbircme.status.disconnected=Disconnected
+tbircme.status.connecting=Connecting...
